@@ -1,6 +1,6 @@
 # KikiFlarr
 
-Application iOS native pour centraliser la gestion de vos services médias : **Radarr**, **Sonarr**, **qBittorrent** et **Overseerr** — le tout dans une seule application élégante.
+Application iOS native pour centraliser la gestion de vos services médias : **Radarr**, **Sonarr**, **qBittorrent** et **Overseerr** — le tout dans une seule application élégante. Incluant un système de **Collection** avec suivi des films/séries vus et **badges gamifiés** pour suivre vos progrès de cinéphile !
 
 ![iOS 17+](https://img.shields.io/badge/iOS-17%2B-blue)
 ![Swift 5.9](https://img.shields.io/badge/Swift-5.9-orange)
@@ -47,6 +47,40 @@ Application iOS native pour centraliser la gestion de vos services médias : **R
   - Ratio de partage
   - État avec icône colorée
 
+### 🏆 Collection & Badges Gamifiés
+- **Suivi personnel des films et séries vus**
+  - Marquez vos films/séries comme "vus" depuis votre bibliothèque
+  - Recherche et ajout manuel via TMDB (si configuré)
+  - Notes personnelles (1-5 étoiles) et commentaires
+  - Affichage des posters et métadonnées
+  - Suppression par swipe
+
+- **Statistiques détaillées**
+  - Nombre total de films, séries et épisodes vus
+  - Temps total passé à regarder (films + séries combinés)
+  - Répartition par genre avec compteurs
+  - Films/épisodes cette semaine et ce mois
+  - Streak actuel et meilleur streak (jours consécutifs)
+
+- **Système de badges avec 6 catégories**
+  - 🏆 **Collectionneur** : Basé sur le nombre de films vus (1 à 1000+)
+  - 📺 **Collectionneur Séries** : Basé sur les séries et épisodes vus
+  - 🎭 **Genre** : Badges par genre (Action, Comedy, Horror, etc.)
+  - 🔥 **Marathon** : Films regardés en un jour/semaine
+  - ❤️ **Dévotion** : Streaks de visionnage (3 à 100+ jours)
+  - ✨ **Spécial** : Défis uniques (Noctambule, Lève-tôt, Éclectique, etc.)
+
+- **5 niveaux de rareté**
+  - Commun, Peu commun, Rare, Épique, Légendaire
+  - Effets visuels avec glow selon la rareté
+  - Animation de déblocage en temps réel
+  - Fiche détaillée par badge avec date de déblocage
+
+- **Intégration TMDB directe** (optionnelle)
+  - Recherche de films en dehors de votre bibliothèque
+  - Ajout de films vus manuellement
+  - Métadonnées enrichies (runtime, genres, etc.)
+
 ### 🏠 Multi-instances
 - Support de plusieurs serveurs simultanément
 - Idéal pour environnements local + seedbox distant
@@ -85,23 +119,29 @@ KikiFlarr/
 │   └── ContentView.swift          # Vue principale + navigation
 ├── Models/
 │   ├── ServiceInstance.swift      # Modèle d'instance de service
+│   ├── InstanceGroup.swift        # Groupement d'instances
 │   ├── RadarrModels.swift         # Types Radarr API v3
 │   ├── SonarrModels.swift         # Types Sonarr API v3
 │   ├── QBittorrentModels.swift    # Types qBittorrent Web API v2
-│   └── OverseerrModels.swift      # Types Overseerr API
+│   ├── OverseerrModels.swift      # Types Overseerr API
+│   ├── TMDBModels.swift           # Types TMDB API
+│   └── WatchedModels.swift        # Films/Séries vus et Badges
 ├── Services/
 │   ├── NetworkError.swift         # Gestion des erreurs réseau
 │   ├── APIClient.swift            # Client HTTP générique
 │   ├── RadarrService.swift        # Service Radarr
 │   ├── SonarrService.swift        # Service Sonarr
 │   ├── QBittorrentService.swift   # Service qBittorrent (v4 & v5)
-│   └── OverseerrService.swift     # Service Overseerr
+│   ├── OverseerrService.swift     # Service Overseerr
+│   ├── TMDBService.swift          # Service TMDB direct
+│   └── WatchedStorageService.swift # Stockage local films/badges vus
 ├── ViewModels/
 │   ├── SearchViewModel.swift      # Logique de recherche
 │   ├── DiscoverViewModel.swift    # Logique découverte/tendances
 │   ├── DetailsViewModel.swift     # Logique des détails + ajout
 │   ├── LibraryViewModel.swift     # Logique bibliothèque
 │   ├── DownloadsViewModel.swift   # Logique des téléchargements
+│   ├── WatchedViewModel.swift     # Logique collection & badges
 │   └── SettingsViewModel.swift    # Logique des paramètres
 ├── Views/
 │   ├── Components/
@@ -121,12 +161,17 @@ KikiFlarr/
 │   │   └── SeriesDetailView.swift # Détails d'une série
 │   ├── Downloads/
 │   │   └── DownloadsView.swift    # Écran des téléchargements
+│   ├── Collection/
+│   │   ├── CollectionView.swift   # Écran collection & badges
+│   │   └── TMDBSearchView.swift   # Recherche TMDB directe
 │   └── Settings/
 │       ├── SettingsView.swift     # Écran des paramètres
 │       └── OnboardingView.swift   # Écran d'accueil/configuration
 ├── Utilities/
 │   ├── KeychainManager.swift      # Gestion du Keychain
 │   ├── InstanceManager.swift      # Gestion des instances
+│   ├── ImageCache.swift           # Cache d'images
+│   ├── ResponseCache.swift        # Cache de réponses API
 │   └── Formatters.swift           # Utilitaires de formatage
 └── Resources/
     └── Config.example.swift       # Configuration exemple
@@ -139,7 +184,8 @@ KikiFlarr/
 - Services configurés :
   - Overseerr avec clé API (pour la recherche)
   - Radarr et/ou Sonarr avec clés API (pour l'ajout de médias)
-  - qBittorrent v4.x ou v5.x avec Web UI activée (optionnel, pour le suivi)
+  - qBittorrent v4.x ou v5.x avec Web UI activée (optionnel, pour le suivi des téléchargements)
+  - TMDB API key (optionnel, pour recherche et ajout manuel de films dans la Collection)
 
 ## Installation
 
@@ -216,6 +262,17 @@ xcodebuild -scheme KikiFlarr -destination 'platform=iOS Simulator,name=iPhone 15
 4. Identifiants : username/password configurés dans Web UI
 5. **Important pour v5+** : L'application détecte automatiquement la version et utilise les bons endpoints
 
+### TMDB (optionnel)
+
+Pour activer la recherche et l'ajout manuel de films dans la Collection :
+
+1. Créez un compte sur [The Movie Database](https://www.themoviedb.org/)
+2. Allez dans **Settings > API**
+3. Demandez une clé API (gratuit pour usage personnel)
+4. Dans KikiFlarr, allez dans **Paramètres > TMDB**
+5. Entrez votre clé API
+6. Vous pourrez maintenant utiliser le bouton **+** dans l'onglet Collection pour rechercher n'importe quel film
+
 ## Utilisation
 
 ### Premier lancement
@@ -232,10 +289,10 @@ L'application utilise une barre d'onglets avec 5 sections :
 
 | Onglet | Fonction |
 |--------|----------|
-| 🔍 Recherche | Rechercher films et séries |
-| 🎬 Découvrir | Tendances et suggestions |
+| ✨ Découvrir | Tendances et suggestions Overseerr |
 | 📚 Bibliothèque | Vos médias Radarr/Sonarr |
-| ⬇️ Téléchargements | Suivi qBittorrent |
+| 🏆 Collection | Films/séries vus & badges gamifiés |
+| ⬇️ Transferts | Suivi qBittorrent en temps réel |
 | ⚙️ Paramètres | Configuration des instances |
 
 ### Recherche & Ajout
@@ -251,13 +308,44 @@ L'application utilise une barre d'onglets avec 5 sections :
 
 ### Gestion des téléchargements
 
-1. L'onglet "Téléchargements" affiche tous vos torrents
+1. L'onglet "Transferts" affiche tous vos torrents
 2. Rafraîchissement automatique toutes les 5 secondes
 3. Pull-to-refresh pour forcer le rafraîchissement
 4. Utilisez les filtres pour affiner la vue
 5. Actions disponibles sur chaque torrent :
    - **Pause/Reprendre** : Contrôle de l'état du torrent
    - **Supprimer** : Avec confirmation et option de supprimer les fichiers
+
+### Collection & Suivi Personnel
+
+#### Marquer comme vu
+1. Depuis votre **Bibliothèque**, appuyez sur un film ou série
+2. Appuyez sur le bouton "Marquer comme vu"
+3. Optionnel : Ajoutez une note (1-5 étoiles) et un commentaire
+
+#### Ajouter manuellement via TMDB
+1. Configurez une clé API TMDB dans les **Paramètres** (optionnel)
+2. Dans l'onglet **Collection**, appuyez sur **+**
+3. Recherchez n'importe quel film
+4. Ajoutez-le à votre collection avec note et commentaire
+
+#### Badges & Progression
+1. Accédez à l'onglet **Collection**
+2. Basculez vers **Badges** avec le sélecteur en haut
+3. Consultez votre progression globale et par catégorie
+4. Appuyez sur un badge pour voir ses détails
+5. Les badges se débloquent automatiquement selon vos progrès
+6. Une notification toast apparaît lors du déblocage d'un nouveau badge
+
+#### Statistiques
+1. Dans l'onglet **Collection**, appuyez sur l'icône 📊 en haut
+2. Consultez vos statistiques détaillées :
+   - Vue d'ensemble (films, séries, épisodes)
+   - Temps total passé
+   - Streaks (actuel et meilleur)
+   - Répartition par genre
+   - Films/épisodes cette semaine et ce mois
+   - Progression des badges par rareté
 
 ## Gestion des erreurs
 
@@ -319,6 +407,38 @@ La session expire après un certain temps. L'app se reconnecte automatiquement, 
 2. Désactiver "Bypass authentication for clients on localhost" si vous êtes en local
 
 ## Changelog
+
+### v2.0.0 - Collection & Badges
+- 🏆 **Nouvelle fonctionnalité Collection** : Suivez vos films et séries vus
+  - Marquez les films/séries comme "vus" depuis votre bibliothèque
+  - Ajout de notes personnelles (1-5 étoiles) et commentaires
+  - Suppression par swipe
+- 🎮 **Système de badges gamifiés** avec 6 catégories :
+  - Collectionneur (films et séries)
+  - Genre (Action, Comedy, Horror, etc.)
+  - Marathon (visionnages intensifs)
+  - Dévotion (streaks consécutifs)
+  - Spécial (défis uniques)
+- 📊 **Statistiques détaillées** :
+  - Nombre total de films, séries et épisodes vus
+  - Temps total passé (films + séries)
+  - Streaks de visionnage (actuel et meilleur)
+  - Répartition par genre
+  - Progression par période (semaine, mois)
+- 🎬 **Intégration TMDB directe** (optionnelle) :
+  - Recherche de films en dehors de votre bibliothèque
+  - Ajout manuel de films vus avec métadonnées enrichies
+- ✨ **Interface améliorée** :
+  - Nouvel onglet "Collection" avec onglet "Films vus" et "Badges"
+  - Animation de déblocage des badges en temps réel
+  - Fiches détaillées par badge avec date de déblocage
+  - Effets visuels avec glow selon la rareté des badges
+- 💾 **Cache optimisé** :
+  - Cache d'images pour chargement plus rapide
+  - Cache de réponses API pour réduire les requêtes
+- 🔄 **Navigation mise à jour** :
+  - Renommage "Téléchargements" → "Transferts"
+  - Ordre des onglets optimisé pour une meilleure UX
 
 ### v1.1.0
 - ✅ Support complet de qBittorrent v5.x (nouveaux endpoints stop/start)

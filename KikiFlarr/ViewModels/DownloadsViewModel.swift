@@ -7,13 +7,14 @@ class DownloadsViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String?
     @Published var selectedFilter: TorrentFilter = .all
-    
+    @Published private(set) var hasAttemptedLoad = false
+
     @Published private(set) var totalDownloadSpeed: Int64 = 0
     @Published private(set) var totalUploadSpeed: Int64 = 0
     @Published private(set) var downloadingCount: Int = 0
     @Published private(set) var seedingCount: Int = 0
     @Published private(set) var pausedCount: Int = 0
-    
+
     private weak var instanceManager: InstanceManager?
     private var refreshTask: Task<Void, Never>?
     
@@ -40,12 +41,13 @@ class DownloadsViewModel: ObservableObject {
     
     func loadTorrents() async {
         guard let instanceManager = instanceManager else { return }
-        
+
         let wasEmpty = torrents.isEmpty
         if wasEmpty {
             isLoading = true
         }
         errorMessage = nil
+        hasAttemptedLoad = true
         
         var allTorrents: [TorrentWithInstance] = []
         

@@ -11,7 +11,9 @@ struct DownloadsView: View {
             Group {
                 if instanceManager.qbittorrentInstances.isEmpty {
                     noInstancesView
-                } else if viewModel.isLoading && viewModel.torrents.isEmpty {
+                } else if viewModel.torrents.isEmpty && !viewModel.hasAttemptedLoad {
+                    ProgressView("Chargement...")
+                } else if viewModel.torrents.isEmpty && viewModel.isLoading {
                     ProgressView("Chargement...")
                 } else if viewModel.torrents.isEmpty {
                     emptyView

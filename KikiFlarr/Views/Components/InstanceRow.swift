@@ -4,7 +4,8 @@ struct InstanceRow: View {
     let instance: ServiceInstance
     @State private var connectionStatus: ConnectionTestResult?
     @State private var isTesting = false
-    
+    @State private var freeSpace: Int64?
+
     var instanceManager: InstanceManager
     
     var body: some View {
@@ -32,11 +33,25 @@ struct InstanceRow: View {
                         .background(serviceColor.opacity(0.1))
                         .foregroundColor(serviceColor)
                         .clipShape(Capsule())
-                    
+
                     if let status = connectionStatus {
                         Image(systemName: status.success ? "checkmark.circle.fill" : "xmark.circle.fill")
                             .font(.caption)
                             .foregroundColor(status.success ? .green : .red)
+                    }
+
+                    if let space = freeSpace {
+                        HStack(spacing: 2) {
+                            Image(systemName: "internaldrive")
+                                .font(.caption2)
+                            Text(Formatters.formatBytes(space))
+                                .font(.caption2)
+                        }
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(storageColor(for: space).opacity(0.1))
+                        .foregroundColor(storageColor(for: space))
+                        .clipShape(Capsule())
                     }
                 }
             }
@@ -60,6 +75,11 @@ struct InstanceRow: View {
             }
         }
         .padding(.vertical, 4)
+        .task {
+            if freeSpace == nil && instance.serviceType != .overseerr {
+                freeSpace = await instanceManager.getStorageInfo(for: instance)
+            }
+        }
     }
     
     private var serviceColor: Color {
@@ -71,10 +91,25 @@ struct InstanceRow: View {
         default: return .gray
         }
     }
-    
+
+    private func storageColor(for bytes: Int64) -> Color {
+        let gb = Double(bytes) / 1_000_000_000
+        if gb < 50 {
+            return .red
+        } else if gb < 200 {
+            return .orange
+        } else {
+            return .green
+        }
+    }
+
     private func testConnection() async {
         isTesting = true
-        connectionStatus = await instanceManager.testConnection(for: instance)
+        async let connectionResult = instanceManager.testConnection(for: instance)
+        async let storageResult = instanceManager.getStorageInfo(for: instance)
+
+        connectionStatus = await connectionResult
+        freeSpace = await storageResult
         isTesting = false
     }
 }

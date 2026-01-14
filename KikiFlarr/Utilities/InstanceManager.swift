@@ -242,8 +242,44 @@ class InstanceManager: ObservableObject {
         return OverseerrService(baseURL: instance.baseURL, apiKey: apiKey)
     }
     
+    // MARK: - Storage Info
+
+    func getStorageInfo(for instance: ServiceInstance) async -> Int64? {
+        switch instance.serviceType {
+        case .radarr:
+            guard let service = radarrService(for: instance) else { return nil }
+            do {
+                let rootFolders = try await service.getRootFolders()
+                return rootFolders.compactMap { $0.freeSpace }.first
+            } catch {
+                return nil
+            }
+
+        case .sonarr:
+            guard let service = sonarrService(for: instance) else { return nil }
+            do {
+                let rootFolders = try await service.getRootFolders()
+                return rootFolders.compactMap { $0.freeSpace }.first
+            } catch {
+                return nil
+            }
+
+        case .qbittorrent:
+            guard let service = qbittorrentService(for: instance) else { return nil }
+            do {
+                let serverState = try await service.getTransferInfo()
+                return serverState.freeSpaceOnDisk
+            } catch {
+                return nil
+            }
+
+        case .overseerr:
+            return nil
+        }
+    }
+
     // MARK: - Connection Testing
-    
+
     func testConnection(for instance: ServiceInstance) async -> ConnectionTestResult {
         switch instance.serviceType {
         case .radarr:

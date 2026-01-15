@@ -9,6 +9,7 @@ struct CollectionView: View {
     
     enum CollectionTab: String, CaseIterable {
         case movies = "Films vus"
+        case episodes = "Épisodes vus"
         case badges = "Badges"
     }
     
@@ -30,6 +31,8 @@ struct CollectionView: View {
                     switch selectedTab {
                     case .movies:
                         WatchedMoviesListView()
+                    case .episodes:
+                        WatchedEpisodesListView()
                     case .badges:
                         BadgesGridView()
                     }
@@ -180,6 +183,182 @@ struct WatchedMoviesListView: View {
         }
         .listStyle(.insetGrouped)
         .searchable(text: $searchText, prompt: "Rechercher un film")
+    }
+}
+
+// MARK: - Liste des épisodes vus
+
+struct WatchedEpisodesListView: View {
+    @EnvironmentObject var watchedViewModel: WatchedViewModel
+    @State private var searchText = ""
+
+    var filteredEpisodes: [WatchedEpisode] {
+        if searchText.isEmpty {
+            return watchedViewModel.watchedEpisodes
+        }
+        return watchedViewModel.watchedEpisodes.filter {
+            $0.seriesTitle.localizedCaseInsensitiveContains(searchText) ||
+            $0.episodeTitle.localizedCaseInsensitiveContains(searchText)
+        }
+    }
+
+    var body: some View {
+        Group {
+            if watchedViewModel.watchedEpisodes.isEmpty {
+                emptyState
+            } else {
+                episodesList
+            }
+        }
+    }
+
+    private var emptyState: some View {
+        ContentUnavailableView {
+            Label("Aucun épisode vu", systemImage: "tv")
+        } description: {
+            Text("Marquez des épisodes comme vus depuis votre bibliothèque de séries")
+        }
+    }
+
+    private var episodesList: some View {
+        List {
+            // Stats rapides
+            Section {
+                VStack(spacing: 12) {
+                    // Première ligne : Films, Épisodes, Total
+                    HStack(spacing: 12) {
+                        StatBubble(
+                            icon: "film.fill",
+                            value: "\(watchedViewModel.stats.totalMovies)",
+                            label: "Films",
+                            color: .blue
+                        )
+
+                        StatBubble(
+                            icon: "tv.fill",
+                            value: "\(watchedViewModel.stats.totalEpisodes)",
+                            label: "Épisodes",
+                            color: .teal
+                        )
+
+                        StatBubble(
+                            icon: "play.rectangle.fill",
+                            value: "\(watchedViewModel.stats.totalWatched)",
+                            label: "Total",
+                            color: .indigo
+                        )
+                    }
+
+                    // Deuxième ligne : Durée totale et Streak
+                    HStack(spacing: 12) {
+                        StatBubble(
+                            icon: "clock.fill",
+                            value: watchedViewModel.stats.formattedCombinedRuntime,
+                            label: "Durée totale",
+                            color: .purple
+                        )
+
+                        StatBubble(
+                            icon: "flame.fill",
+                            value: "\(watchedViewModel.stats.currentStreak)",
+                            label: "Streak",
+                            color: .orange
+                        )
+                    }
+                }
+                .listRowBackground(Color.clear)
+                .listRowInsets(EdgeInsets())
+                .padding(.vertical, 8)
+            }
+
+            // Liste des épisodes
+            Section("Épisodes récents") {
+                ForEach(filteredEpisodes) { episode in
+                    WatchedEpisodeRow(episode: episode)
+                        .swipeActions(edge: .trailing) {
+                            Button(role: .destructive) {
+                                watchedViewModel.removeFromWatched(episode)
+                            } label: {
+                                Label("Supprimer", systemImage: "trash")
+                            }
+                        }
+                }
+            }
+        }
+        .listStyle(.insetGrouped)
+        .searchable(text: $searchText, prompt: "Rechercher un épisode ou une série")
+    }
+}
+
+// MARK: - Ligne d'épisode vu
+
+struct WatchedEpisodeRow: View {
+    let episode: WatchedEpisode
+
+    var body: some View {
+        HStack(spacing: 12) {
+            // Poster de la série
+            AsyncImage(url: URL(string: episode.seriesPosterURL ?? "")) { phase in
+                switch phase {
+                case .success(let image):
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                case .failure(_), .empty:
+                    Rectangle()
+                        .fill(Color.gray.opacity(0.3))
+                        .overlay(
+                            Image(systemName: "tv")
+                                .foregroundColor(.gray)
+                        )
+                @unknown default:
+                    Rectangle()
+                        .fill(Color.gray.opacity(0.3))
+                }
+            }
+            .frame(width: 50, height: 75)
+            .clipShape(RoundedRectangle(cornerRadius: 6))
+
+            // Infos
+            VStack(alignment: .leading, spacing: 4) {
+                Text(episode.seriesTitle)
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                    .lineLimit(1)
+
+                Text("S\(episode.seasonNumber)E\(episode.episodeNumber) - \(episode.episodeTitle)")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .lineLimit(1)
+
+                HStack(spacing: 4) {
+                    Image(systemName: "calendar")
+                        .font(.caption2)
+                    Text(episode.watchedDate, style: .date)
+                        .font(.caption)
+                }
+                .foregroundColor(.secondary)
+
+                // Note personnelle
+                if let rating = episode.rating {
+                    HStack(spacing: 2) {
+                        ForEach(1...5, id: \.self) { star in
+                            Image(systemName: star <= rating ? "star.fill" : "star")
+                                .font(.caption2)
+                                .foregroundColor(.yellow)
+                        }
+                    }
+                }
+            }
+
+            Spacer()
+
+            // Badge "Vu"
+            Image(systemName: "checkmark.circle.fill")
+                .font(.title2)
+                .foregroundColor(.green)
+        }
+        .padding(.vertical, 4)
     }
 }
 

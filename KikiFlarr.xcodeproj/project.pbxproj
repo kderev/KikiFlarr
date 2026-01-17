@@ -365,9 +365,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				6AD3132707F66D145035852F /* Assets.xcassets in Resources */,
-							673CEBC5DA1C44C4B9CFD45A /* LoadableState.swift in Sources */,
-				A5E538ADBF714D7889FBB497 /* LoadableView.swift in Sources */,
-);
+			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
@@ -423,6 +421,8 @@
 				F16B4EA8EA1608E14250AB61 /* WatchedModels.swift in Sources */,
 				2CC51D860C57EEBECF230A07 /* WatchedStorageService.swift in Sources */,
 				9F8533B38C21D8EAF3D2770F /* WatchedViewModel.swift in Sources */,
+				673CEBC5DA1C44C4B9CFD45A /* LoadableState.swift in Sources */,
+				A5E538ADBF714D7889FBB497 /* LoadableView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

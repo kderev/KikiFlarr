@@ -15,6 +15,32 @@ struct AppError: Error {
     /// Crée un AppError à partir d'une erreur système
     static func from(_ error: Error) -> AppError {
         if let networkError = error as? NetworkError {
+            // Améliorer le message pour les erreurs de décodage
+            if case .decodingError(let underlyingError) = networkError {
+                let decodingContext = (underlyingError as? DecodingError).map { decodingError -> String in
+                    switch decodingError {
+                    case .keyNotFound(let key, let context):
+                        return "Clé manquante: \(key.stringValue) - \(context.debugDescription)"
+                    case .typeMismatch(let type, let context):
+                        return "Type incorrect: attendu \(type) - \(context.debugDescription)"
+                    case .valueNotFound(let type, let context):
+                        return "Valeur manquante pour type \(type) - \(context.debugDescription)"
+                    case .dataCorrupted(let context):
+                        return "Données corrompues: \(context.debugDescription)"
+                    @unknown default:
+                        return underlyingError.localizedDescription
+                    }
+                } ?? underlyingError.localizedDescription
+
+                print("❌ Erreur de décodage détaillée: \(decodingContext)")
+
+                return AppError(
+                    title: "Erreur de décodage",
+                    message: "Impossible de lire les données du serveur",
+                    recoverySuggestion: "Vérifiez que votre instance Overseerr est à jour"
+                )
+            }
+
             return AppError(
                 title: "Erreur réseau",
                 message: networkError.errorDescription ?? "Une erreur réseau s'est produite",

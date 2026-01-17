@@ -80,11 +80,14 @@ class SearchViewModel: ObservableObject {
 
         let query = searchQuery
 
+        print("🔍 Recherche pour: '\(query)'")
+
         state = .loading
         hasSearched = true
 
         do {
             let results = try await service.search(query: query)
+            print("✅ Résultats de recherche reçus: \(results.results.count) éléments")
 
             guard !Task.isCancelled, searchQuery == query else { return }
 

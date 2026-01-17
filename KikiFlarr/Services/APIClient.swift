@@ -47,10 +47,16 @@ actor APIClient {
             }
             
             try validateResponse(httpResponse)
-            
+
             do {
                 return try decoder.decode(T.self, from: data)
             } catch {
+                // Log la réponse brute pour faciliter le debugging
+                if let jsonString = String(data: data, encoding: .utf8) {
+                    print("❌ Erreur de décodage pour URL: \(url)")
+                    print("📦 Réponse JSON brute (premiers 500 caractères):")
+                    print(String(jsonString.prefix(500)))
+                }
                 throw NetworkError.decodingError(error)
             }
         } catch let error as NetworkError {

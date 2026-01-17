@@ -13,11 +13,11 @@ actor APIClient {
         self.session = URLSession(configuration: config)
         
         self.decoder = JSONDecoder()
-        self.decoder.keyDecodingStrategy = .useDefaultKeys
+        self.decoder.keyDecodingStrategy = .convertFromSnakeCase
         self.decoder.dateDecodingStrategy = .iso8601
         
         self.encoder = JSONEncoder()
-        self.encoder.keyEncodingStrategy = .useDefaultKeys
+        self.encoder.keyEncodingStrategy = .convertToSnakeCase
     }
     
     func request<T: Decodable>(
@@ -182,7 +182,7 @@ actor APIClient {
     
     nonisolated func encode<T: Encodable>(_ value: T) throws -> Data {
         let encoder = JSONEncoder()
-        encoder.keyEncodingStrategy = .useDefaultKeys
+        encoder.keyEncodingStrategy = .convertToSnakeCase
         do {
             return try encoder.encode(value)
         } catch {

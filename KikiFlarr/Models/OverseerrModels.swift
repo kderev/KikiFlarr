@@ -10,6 +10,13 @@ struct OverseerrSearchResults: Codable {
     let totalPages: Int
     let totalResults: Int
     let results: [OverseerrSearchResult]
+
+    enum CodingKeys: String, CodingKey {
+        case page
+        case totalPages = "total_pages"
+        case totalResults = "total_results"
+        case results
+    }
 }
 
 struct OverseerrSearchResult: Codable, Identifiable {
@@ -41,10 +48,25 @@ struct OverseerrSearchResult: Codable, Identifiable {
     let mediaInfo: OverseerrMediaInfo?
 
     enum CodingKeys: String, CodingKey {
-        case id, mediaType, popularity, posterPath, backdropPath
-        case voteCount, voteAverage, genreIds, overview, originalLanguage
-        case title, originalTitle, releaseDate, adult, video
-        case name, originalName, firstAirDate, originCountry
+        case id
+        case mediaType = "media_type"
+        case popularity
+        case posterPath = "poster_path"
+        case backdropPath = "backdrop_path"
+        case voteCount = "vote_count"
+        case voteAverage = "vote_average"
+        case genreIds = "genre_ids"
+        case overview
+        case originalLanguage = "original_language"
+        case title
+        case originalTitle = "original_title"
+        case releaseDate = "release_date"
+        case adult
+        case video
+        case name
+        case originalName = "original_name"
+        case firstAirDate = "first_air_date"
+        case originCountry = "origin_country"
         case mediaInfo = "media"
     }
 

@@ -13,9 +13,11 @@ actor APIClient {
         self.session = URLSession(configuration: config)
         
         self.decoder = JSONDecoder()
+        self.decoder.keyDecodingStrategy = .convertFromSnakeCase
         self.decoder.dateDecodingStrategy = .iso8601
 
         self.encoder = JSONEncoder()
+        self.encoder.keyEncodingStrategy = .convertToSnakeCase
     }
     
     func request<T: Decodable>(

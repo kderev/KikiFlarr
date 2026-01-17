@@ -13,10 +13,10 @@ struct TMDBImageConfiguration: Codable {
     let backdropSizes: [String]
     
     enum CodingKeys: String, CodingKey {
-        case baseUrl = "base_url"
-        case secureBaseUrl = "secure_base_url"
-        case posterSizes = "poster_sizes"
-        case backdropSizes = "backdrop_sizes"
+        case baseUrl
+        case secureBaseUrl
+        case posterSizes
+        case backdropSizes
     }
 }
 
@@ -31,8 +31,8 @@ struct TMDBSearchResponse: Codable {
     enum CodingKeys: String, CodingKey {
         case page
         case results
-        case totalPages = "total_pages"
-        case totalResults = "total_results"
+        case totalPages
+        case totalResults
     }
 }
 
@@ -63,14 +63,14 @@ struct TMDBMovie: Codable, Identifiable, Hashable {
     enum CodingKeys: String, CodingKey {
         case id
         case title
-        case originalTitle = "original_title"
+        case originalTitle
         case overview
-        case posterPath = "poster_path"
-        case backdropPath = "backdrop_path"
-        case releaseDate = "release_date"
-        case voteAverage = "vote_average"
-        case voteCount = "vote_count"
-        case genreIds = "genre_ids"
+        case posterPath
+        case backdropPath
+        case releaseDate
+        case voteAverage
+        case voteCount
+        case genreIds
         case genres
         case runtime
         case adult
@@ -118,12 +118,12 @@ struct TMDBTrendingResponse: Codable {
     let results: [TMDBMovie]
     let totalPages: Int
     let totalResults: Int
-    
+
     enum CodingKeys: String, CodingKey {
         case page
         case results
-        case totalPages = "total_pages"
-        case totalResults = "total_results"
+        case totalPages
+        case totalResults
     }
 }
 
@@ -154,12 +154,12 @@ struct TMDBTVSearchResponse: Codable {
     let results: [TMDBTVShow]
     let totalPages: Int
     let totalResults: Int
-    
+
     enum CodingKeys: String, CodingKey {
         case page
         case results
-        case totalPages = "total_pages"
-        case totalResults = "total_results"
+        case totalPages
+        case totalResults
     }
 }
 
@@ -191,17 +191,17 @@ struct TMDBTVShow: Codable, Identifiable, Hashable {
     enum CodingKeys: String, CodingKey {
         case id
         case name
-        case originalName = "original_name"
+        case originalName
         case overview
-        case posterPath = "poster_path"
-        case backdropPath = "backdrop_path"
-        case firstAirDate = "first_air_date"
-        case voteAverage = "vote_average"
-        case voteCount = "vote_count"
-        case genreIds = "genre_ids"
+        case posterPath
+        case backdropPath
+        case firstAirDate
+        case voteAverage
+        case voteCount
+        case genreIds
         case genres
-        case numberOfEpisodes = "number_of_episodes"
-        case numberOfSeasons = "number_of_seasons"
+        case numberOfEpisodes
+        case numberOfSeasons
         case popularity
         case seasons
     }
@@ -258,11 +258,11 @@ struct TMDBSeason: Codable, Identifiable, Hashable {
         case id
         case name
         case overview
-        case posterPath = "poster_path"
-        case seasonNumber = "season_number"
-        case episodeCount = "episode_count"
-        case airDate = "air_date"
-        case voteAverage = "vote_average"
+        case posterPath
+        case seasonNumber
+        case episodeCount
+        case airDate
+        case voteAverage
         case episodes
     }
     
@@ -306,13 +306,13 @@ struct TMDBEpisode: Codable, Identifiable, Hashable {
         case id
         case name
         case overview
-        case stillPath = "still_path"
-        case episodeNumber = "episode_number"
-        case seasonNumber = "season_number"
-        case airDate = "air_date"
+        case stillPath
+        case episodeNumber
+        case seasonNumber
+        case airDate
         case runtime
-        case voteAverage = "vote_average"
-        case voteCount = "vote_count"
+        case voteAverage
+        case voteCount
     }
     
     var stillURL: URL? {

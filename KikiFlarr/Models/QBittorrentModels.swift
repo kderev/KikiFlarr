@@ -43,32 +43,32 @@ struct QBittorrentTorrent: Codable, Identifiable {
     
     enum CodingKeys: String, CodingKey {
         case hash, name, size, progress, dlspeed, upspeed, priority
-        case numSeeds = "num_seeds"
-        case numComplete = "num_complete"
-        case numLeechs = "num_leechs"
-        case numIncomplete = "num_incomplete"
+        case numSeeds
+        case numComplete
+        case numLeechs
+        case numIncomplete
         case ratio, eta, state
-        case seqDl = "seq_dl"
-        case fLPiecePrio = "f_l_piece_prio"
+        case seqDl
+        case fLPiecePrio
         case category, tags
-        case superSeeding = "super_seeding"
-        case forceStart = "force_start"
-        case savePath = "save_path"
-        case addedOn = "added_on"
-        case completionOn = "completion_on"
+        case superSeeding
+        case forceStart
+        case savePath
+        case addedOn
+        case completionOn
         case tracker
-        case dlLimit = "dl_limit"
-        case upLimit = "up_limit"
+        case dlLimit
+        case upLimit
         case downloaded, uploaded
-        case downloadedSession = "downloaded_session"
-        case uploadedSession = "uploaded_session"
-        case amountLeft = "amount_left"
+        case downloadedSession
+        case uploadedSession
+        case amountLeft
         case completed
-        case maxRatio = "max_ratio"
-        case maxSeedingTime = "max_seeding_time"
-        case autoTmm = "auto_tmm"
-        case timeActive = "time_active"
-        case contentPath = "content_path"
+        case maxRatio
+        case maxSeedingTime
+        case autoTmm
+        case timeActive
+        case contentPath
     }
     
     var stateDescription: String {
@@ -201,25 +201,20 @@ struct QBittorrentMainData: Codable {
     
     enum CodingKeys: String, CodingKey {
         case rid
-        case fullUpdate = "full_update"
+        case fullUpdate
         case torrents
-        case torrentsRemoved = "torrents_removed"
+        case torrentsRemoved
         case categories
-        case categoriesRemoved = "categories_removed"
+        case categoriesRemoved
         case tags
-        case tagsRemoved = "tags_removed"
-        case serverState = "server_state"
+        case tagsRemoved
+        case serverState
     }
 }
 
 struct QBittorrentCategory: Codable {
     let name: String?
     let savePath: String?
-    
-    enum CodingKeys: String, CodingKey {
-        case name
-        case savePath = "savePath"
-    }
 }
 
 struct QBittorrentServerState: Codable {
@@ -251,28 +246,28 @@ struct QBittorrentServerState: Codable {
     enum CodingKeys: String, CodingKey {
         case allTimeDl = "alltime_dl"
         case allTimeUl = "alltime_ul"
-        case averageTimeQueue = "average_time_queue"
-        case connectionStatus = "connection_status"
-        case dhtNodes = "dht_nodes"
-        case dlInfoData = "dl_info_data"
-        case dlInfoSpeed = "dl_info_speed"
-        case dlRateLimit = "dl_rate_limit"
-        case freeSpaceOnDisk = "free_space_on_disk"
-        case globalRatio = "global_ratio"
-        case queuedIoJobs = "queued_io_jobs"
+        case averageTimeQueue
+        case connectionStatus
+        case dhtNodes
+        case dlInfoData
+        case dlInfoSpeed
+        case dlRateLimit
+        case freeSpaceOnDisk
+        case globalRatio
+        case queuedIoJobs
         case queueing
-        case readCacheHits = "read_cache_hits"
-        case readCacheOverload = "read_cache_overload"
-        case refreshInterval = "refresh_interval"
-        case totalBuffersSize = "total_buffers_size"
-        case totalPeerConnections = "total_peer_connections"
-        case totalQueuedSize = "total_queued_size"
-        case totalWastedSession = "total_wasted_session"
-        case upInfoData = "up_info_data"
-        case upInfoSpeed = "up_info_speed"
-        case upRateLimit = "up_rate_limit"
-        case useAltSpeedLimits = "use_alt_speed_limits"
-        case writeCacheOverload = "write_cache_overload"
+        case readCacheHits
+        case readCacheOverload
+        case refreshInterval
+        case totalBuffersSize
+        case totalPeerConnections
+        case totalQueuedSize
+        case totalWastedSession
+        case upInfoData
+        case upInfoSpeed
+        case upRateLimit
+        case useAltSpeedLimits
+        case writeCacheOverload
     }
 }
 

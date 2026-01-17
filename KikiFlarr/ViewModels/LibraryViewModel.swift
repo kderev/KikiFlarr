@@ -3,16 +3,18 @@ import SwiftUI
 
 @MainActor
 class LibraryViewModel: ObservableObject {
-    @Published var radarrMovies: [MovieWithInstance] = []
-    @Published var sonarrSeries: [SeriesWithInstance] = []
-    @Published var isLoadingMovies = false
-    @Published var isLoadingSeries = false
+    @Published var moviesState: LoadableState<[MovieWithInstance]> = .idle
+    @Published var seriesState: LoadableState<[SeriesWithInstance]> = .idle
     @Published var isRefreshing = false
-    @Published var errorMessage: String?
     @Published var selectedTab: LibraryTab = .movies
-    
-    @Published private(set) var moviesCount: Int = 0
-    @Published private(set) var seriesCount: Int = 0
+
+    var moviesCount: Int {
+        moviesState.data?.count ?? 0
+    }
+
+    var seriesCount: Int {
+        seriesState.data?.count ?? 0
+    }
     
     enum LibraryTab {
         case movies
@@ -68,19 +70,26 @@ class LibraryViewModel: ObservableObject {
     }
     
     func loadMovies() async {
-        guard let instanceManager = instanceManager else { return }
-        
-        let isInitialLoad = radarrMovies.isEmpty
-        if isInitialLoad {
-            isLoadingMovies = true
+        guard let instanceManager = instanceManager else {
+            moviesState = .failed(AppError(
+                title: "Configuration manquante",
+                message: "Gestionnaire d'instances non initialisé",
+                recoverySuggestion: "Veuillez redémarrer l'application"
+            ))
+            return
         }
-        
+
+        // Afficher le loading seulement si on n'a pas encore de données
+        if moviesState.data == nil {
+            moviesState = .loading
+        }
+
         var allMovies: [MovieWithInstance] = []
-        
+
         await withTaskGroup(of: [MovieWithInstance].self) { group in
             for instance in instanceManager.radarrInstances {
                 guard let service = instanceManager.radarrService(for: instance) else { continue }
-                
+
                 group.addTask {
                     do {
                         let movies = try await service.getMovies()
@@ -90,33 +99,42 @@ class LibraryViewModel: ObservableObject {
                     }
                 }
             }
-            
+
             for await result in group {
                 allMovies.append(contentsOf: result)
             }
         }
-        
-        if !allMovies.isEmpty || isInitialLoad {
-            radarrMovies = allMovies.sorted { ($0.movie.added ?? "") > ($1.movie.added ?? "") }
-            moviesCount = radarrMovies.count
+
+        let sortedMovies = allMovies.sorted { ($0.movie.added ?? "") > ($1.movie.added ?? "") }
+
+        if sortedMovies.isEmpty {
+            moviesState = .empty
+        } else {
+            moviesState = .loaded(sortedMovies)
         }
-        isLoadingMovies = false
     }
     
     func loadSeries() async {
-        guard let instanceManager = instanceManager else { return }
-        
-        let isInitialLoad = sonarrSeries.isEmpty
-        if isInitialLoad {
-            isLoadingSeries = true
+        guard let instanceManager = instanceManager else {
+            seriesState = .failed(AppError(
+                title: "Configuration manquante",
+                message: "Gestionnaire d'instances non initialisé",
+                recoverySuggestion: "Veuillez redémarrer l'application"
+            ))
+            return
         }
-        
+
+        // Afficher le loading seulement si on n'a pas encore de données
+        if seriesState.data == nil {
+            seriesState = .loading
+        }
+
         var allSeries: [SeriesWithInstance] = []
-        
+
         await withTaskGroup(of: [SeriesWithInstance].self) { group in
             for instance in instanceManager.sonarrInstances {
                 guard let service = instanceManager.sonarrService(for: instance) else { continue }
-                
+
                 group.addTask {
                     do {
                         let series = try await service.getSeries()
@@ -126,24 +144,26 @@ class LibraryViewModel: ObservableObject {
                     }
                 }
             }
-            
+
             for await result in group {
                 allSeries.append(contentsOf: result)
             }
         }
-        
-        if !allSeries.isEmpty || isInitialLoad {
-            sonarrSeries = allSeries.sorted { ($0.series.added ?? "") > ($1.series.added ?? "") }
-            seriesCount = sonarrSeries.count
+
+        let sortedSeries = allSeries.sorted { ($0.series.added ?? "") > ($1.series.added ?? "") }
+
+        if sortedSeries.isEmpty {
+            seriesState = .empty
+        } else {
+            seriesState = .loaded(sortedSeries)
         }
-        isLoadingSeries = false
     }
     
     var availableMoviesCount: Int {
-        radarrMovies.filter { $0.movie.hasFile == true }.count
+        moviesState.data?.filter { $0.movie.hasFile == true }.count ?? 0
     }
-    
+
     var availableSeriesCount: Int {
-        sonarrSeries.filter { ($0.series.statistics?.percentOfEpisodes ?? 0) >= 100 }.count
+        seriesState.data?.filter { ($0.series.statistics?.percentOfEpisodes ?? 0) >= 100 }.count ?? 0
     }
 }

@@ -11,14 +11,20 @@ struct DownloadsView: View {
             Group {
                 if instanceManager.qbittorrentInstances.isEmpty {
                     noInstancesView
-                } else if viewModel.torrents.isEmpty && !viewModel.hasAttemptedLoad {
-                    ProgressView("Chargement...")
-                } else if viewModel.torrents.isEmpty && viewModel.isLoading {
-                    ProgressView("Chargement...")
-                } else if viewModel.torrents.isEmpty {
-                    emptyView
                 } else {
-                    torrentsList
+                    LoadableView(
+                        state: viewModel.state,
+                        emptyIcon: "tray",
+                        emptyTitle: "Aucun téléchargement",
+                        emptyDescription: "Les téléchargements en cours apparaîtront ici",
+                        onRetry: {
+                            Task {
+                                await viewModel.loadTorrents()
+                            }
+                        }
+                    ) { torrents in
+                        torrentsList(torrents: torrents)
+                    }
                 }
             }
             .navigationTitle("Téléchargements")
@@ -82,22 +88,14 @@ struct DownloadsView: View {
             Text("Ajoutez une instance qBittorrent dans les paramètres pour voir vos téléchargements")
         }
     }
-    
-    private var emptyView: some View {
-        ContentUnavailableView {
-            Label("Aucun téléchargement", systemImage: "tray")
-        } description: {
-            Text("Les téléchargements en cours apparaîtront ici")
-        }
-    }
-    
-    private var torrentsList: some View {
+
+    private func torrentsList(torrents: [DownloadsViewModel.TorrentWithInstance]) -> some View {
         VStack(spacing: 0) {
             statsHeader
             
             ScrollView {
                 LazyVStack(spacing: 12) {
-                    ForEach(viewModel.torrents) { torrentWithInstance in
+                    ForEach(torrents) { torrentWithInstance in
                         TorrentCard(
                             torrent: torrentWithInstance.torrent,
                             instanceName: torrentWithInstance.instance.name,

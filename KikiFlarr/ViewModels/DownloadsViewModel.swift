@@ -3,11 +3,8 @@ import SwiftUI
 
 @MainActor
 class DownloadsViewModel: ObservableObject {
-    @Published var torrents: [TorrentWithInstance] = []
-    @Published var isLoading = false
-    @Published var errorMessage: String?
+    @Published var state: LoadableState<[TorrentWithInstance]> = .idle
     @Published var selectedFilter: TorrentFilter = .all
-    @Published private(set) var hasAttemptedLoad = false
 
     @Published private(set) var totalDownloadSpeed: Int64 = 0
     @Published private(set) var totalUploadSpeed: Int64 = 0
@@ -40,21 +37,26 @@ class DownloadsViewModel: ObservableObject {
     }
     
     func loadTorrents() async {
-        guard let instanceManager = instanceManager else { return }
-
-        let wasEmpty = torrents.isEmpty
-        if wasEmpty {
-            isLoading = true
+        guard let instanceManager = instanceManager else {
+            state = .failed(AppError(
+                title: "Configuration manquante",
+                message: "Gestionnaire d'instances non initialisé",
+                recoverySuggestion: "Veuillez redémarrer l'application"
+            ))
+            return
         }
-        errorMessage = nil
-        hasAttemptedLoad = true
-        
+
+        // Afficher le loading seulement si on n'a pas encore de données
+        if state.data == nil {
+            state = .loading
+        }
+
         var allTorrents: [TorrentWithInstance] = []
-        
+
         await withTaskGroup(of: [TorrentWithInstance].self) { group in
             for instance in instanceManager.qbittorrentInstances {
                 guard let service = instanceManager.qbittorrentService(for: instance) else { continue }
-                
+
                 group.addTask {
                     do {
                         let instanceTorrents = try await service.getTorrents(filter: self.selectedFilter)
@@ -64,38 +66,48 @@ class DownloadsViewModel: ObservableObject {
                     }
                 }
             }
-            
+
             for await result in group {
                 allTorrents.append(contentsOf: result)
             }
         }
-        
+
         let sortedTorrents = allTorrents.sorted { ($0.torrent.addedOn ?? 0) > ($1.torrent.addedOn ?? 0) }
-        
-        if sortedTorrents != torrents {
-            torrents = sortedTorrents
-            updateStatistics()
+
+        if sortedTorrents.isEmpty {
+            state = .empty
+        } else {
+            state = .loaded(sortedTorrents)
         }
-        
-        isLoading = false
+
+        updateStatistics()
     }
     
     private func updateStatistics() {
+        guard let torrents = state.data else {
+            totalDownloadSpeed = 0
+            totalUploadSpeed = 0
+            downloadingCount = 0
+            seedingCount = 0
+            pausedCount = 0
+            return
+        }
+
         var dlSpeed: Int64 = 0
         var ulSpeed: Int64 = 0
         var downloading = 0
         var seeding = 0
         var paused = 0
-        
+
         for item in torrents {
             dlSpeed += item.torrent.dlspeed
             ulSpeed += item.torrent.upspeed
-            
+
             if item.torrent.isDownloading { downloading += 1 }
             if item.torrent.isUploading { seeding += 1 }
             if item.torrent.isPaused { paused += 1 }
         }
-        
+
         totalDownloadSpeed = dlSpeed
         totalUploadSpeed = ulSpeed
         downloadingCount = downloading

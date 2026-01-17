@@ -142,36 +142,39 @@ class DownloadsViewModel: ObservableObject {
     func pauseTorrent(_ torrentWithInstance: TorrentWithInstance) async {
         guard let instanceManager = instanceManager,
               let service = instanceManager.qbittorrentService(for: torrentWithInstance.instance) else { return }
-        
+
         do {
             try await service.pauseTorrents(hashes: [torrentWithInstance.torrent.hash])
             await loadTorrents()
         } catch {
-            errorMessage = error.localizedDescription
+            // L'erreur sera gérée lors du prochain loadTorrents
+            print("Error pausing torrent: \(error.localizedDescription)")
         }
     }
     
     func resumeTorrent(_ torrentWithInstance: TorrentWithInstance) async {
         guard let instanceManager = instanceManager,
               let service = instanceManager.qbittorrentService(for: torrentWithInstance.instance) else { return }
-        
+
         do {
             try await service.resumeTorrents(hashes: [torrentWithInstance.torrent.hash])
             await loadTorrents()
         } catch {
-            errorMessage = error.localizedDescription
+            // L'erreur sera gérée lors du prochain loadTorrents
+            print("Error resuming torrent: \(error.localizedDescription)")
         }
     }
     
     func deleteTorrent(_ torrentWithInstance: TorrentWithInstance, deleteFiles: Bool = false) async {
         guard let instanceManager = instanceManager,
               let service = instanceManager.qbittorrentService(for: torrentWithInstance.instance) else { return }
-        
+
         do {
             try await service.deleteTorrents(hashes: [torrentWithInstance.torrent.hash], deleteFiles: deleteFiles)
             await loadTorrents()
         } catch {
-            errorMessage = error.localizedDescription
+            // L'erreur sera gérée lors du prochain loadTorrents
+            print("Error deleting torrent: \(error.localizedDescription)")
         }
     }
 }

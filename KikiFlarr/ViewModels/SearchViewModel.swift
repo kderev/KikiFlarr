@@ -7,15 +7,13 @@ class SearchViewModel: ObservableObject {
     @Published var searchQuery = "" {
         didSet { debounceSearch() }
     }
-    @Published var searchResults: [OverseerrSearchResult] = []
-    @Published var isLoading = false
-    @Published var errorMessage: String?
+    @Published var state: LoadableState<[OverseerrSearchResult]> = .idle
     @Published var hasSearched = false
-    
+
     private var searchTask: Task<Void, Never>?
     private var debounceTask: Task<Void, Never>?
     private weak var instanceManager: InstanceManager?
-    
+
     private let debounceDelay: UInt64 = 300_000_000 // 300ms
     
     init(instanceManager: InstanceManager? = nil) {
@@ -28,13 +26,13 @@ class SearchViewModel: ObservableObject {
     
     private func debounceSearch() {
         debounceTask?.cancel()
-        
+
         guard !searchQuery.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            searchResults = []
+            state = .idle
             hasSearched = false
             return
         }
-        
+
         debounceTask = Task { [weak self] in
             do {
                 try await Task.sleep(nanoseconds: self?.debounceDelay ?? 300_000_000)
@@ -48,13 +46,13 @@ class SearchViewModel: ObservableObject {
     func search() {
         debounceTask?.cancel()
         searchTask?.cancel()
-        
+
         guard !searchQuery.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            searchResults = []
+            state = .idle
             hasSearched = false
             return
         }
-        
+
         searchTask = Task { [weak self] in
             await self?.performSearch()
         }
@@ -62,9 +60,8 @@ class SearchViewModel: ObservableObject {
     
     func clearSearch() {
         searchQuery = ""
-        searchResults = []
+        state = .idle
         hasSearched = false
-        errorMessage = nil
         debounceTask?.cancel()
         searchTask?.cancel()
     }
@@ -73,50 +70,62 @@ class SearchViewModel: ObservableObject {
         guard let instanceManager = instanceManager,
               let overseerrInstance = instanceManager.primaryOverseerr,
               let service = instanceManager.overseerrService(for: overseerrInstance) else {
-            errorMessage = "Aucune instance Overseerr configurée"
+            state = .failed(AppError(
+                title: "Configuration manquante",
+                message: "Aucune instance Overseerr configurée",
+                recoverySuggestion: "Veuillez configurer une instance Overseerr dans les paramètres"
+            ))
             return
         }
-        
+
         let query = searchQuery
-        
-        isLoading = true
-        errorMessage = nil
+
+        state = .loading
         hasSearched = true
-        
+
         do {
             let results = try await service.search(query: query)
-            
+
             guard !Task.isCancelled, searchQuery == query else { return }
-            
-            searchResults = results.results.filter { result in
+
+            let filteredResults = results.results.filter { result in
                 result.mediaType == .movie || result.mediaType == .tv
+            }
+
+            if filteredResults.isEmpty {
+                state = .empty
+            } else {
+                state = .loaded(filteredResults)
             }
         } catch {
             guard !Task.isCancelled else { return }
-            errorMessage = error.localizedDescription
-            searchResults = []
+            state = .failed(AppError.from(error))
         }
-        
-        isLoading = false
     }
     
     func loadTrending() async {
         guard let instanceManager = instanceManager,
               let overseerrInstance = instanceManager.primaryOverseerr,
               let service = instanceManager.overseerrService(for: overseerrInstance) else {
+            state = .failed(AppError(
+                title: "Configuration manquante",
+                message: "Aucune instance Overseerr configurée",
+                recoverySuggestion: "Veuillez configurer une instance Overseerr dans les paramètres"
+            ))
             return
         }
-        
-        isLoading = true
-        errorMessage = nil
-        
+
+        state = .loading
+
         do {
             let results = try await service.trendingMovies()
-            searchResults = results.results
+            if results.results.isEmpty {
+                state = .empty
+            } else {
+                state = .loaded(results.results)
+            }
         } catch {
-            errorMessage = error.localizedDescription
+            state = .failed(AppError.from(error))
         }
-        
-        isLoading = false
     }
 }

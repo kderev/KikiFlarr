@@ -6,30 +6,18 @@ struct SearchView: View {
     
     var body: some View {
         NavigationStack {
-            Group {
-                if viewModel.isLoading && viewModel.searchResults.isEmpty {
-                    ProgressView("Recherche en cours...")
-                } else if let error = viewModel.errorMessage {
-                    ContentUnavailableView {
-                        Label("Erreur", systemImage: "exclamationmark.triangle")
-                    } description: {
-                        Text(error)
-                    } actions: {
-                        Button("Réessayer") {
-                            viewModel.search()
-                        }
+            LoadableView(
+                state: viewModel.state,
+                emptyIcon: "magnifyingglass",
+                emptyTitle: viewModel.hasSearched ? "Aucun résultat" : "Rechercher",
+                emptyDescription: viewModel.hasSearched ? "Aucun résultat pour '\(viewModel.searchQuery)'" : "Recherchez un film ou une série",
+                onRetry: {
+                    if viewModel.hasSearched {
+                        viewModel.search()
                     }
-                } else if viewModel.hasSearched && viewModel.searchResults.isEmpty {
-                    ContentUnavailableView.search(text: viewModel.searchQuery)
-                } else if viewModel.searchResults.isEmpty {
-                    ContentUnavailableView {
-                        Label("Rechercher", systemImage: "magnifyingglass")
-                    } description: {
-                        Text("Recherchez un film ou une série")
-                    }
-                } else {
-                    resultsList
                 }
+            ) { results in
+                resultsList(results: results)
             }
             .navigationTitle("Recherche")
             .searchable(
@@ -46,8 +34,8 @@ struct SearchView: View {
         }
     }
     
-    private var resultsList: some View {
-        List(viewModel.searchResults) { result in
+    private func resultsList(results: [OverseerrSearchResult]) -> some View {
+        List(results) { result in
             NavigationLink {
                 DetailsView(searchResult: result)
             } label: {

@@ -37,41 +37,41 @@ struct LibraryView: View {
     }
     
     private var moviesContent: some View {
-        Group {
-            if viewModel.isLoadingMovies && viewModel.radarrMovies.isEmpty {
-                ProgressView("Chargement des films...")
-            } else if viewModel.radarrMovies.isEmpty {
-                ContentUnavailableView {
-                    Label("Aucun film", systemImage: "film")
-                } description: {
-                    Text("Votre bibliothèque Radarr est vide")
+        LoadableView(
+            state: viewModel.moviesState,
+            emptyIcon: "film",
+            emptyTitle: "Aucun film",
+            emptyDescription: "Votre bibliothèque Radarr est vide",
+            onRetry: {
+                Task {
+                    await viewModel.loadMovies()
                 }
-            } else {
-                moviesList
             }
+        ) { movies in
+            moviesList(movies: movies)
         }
     }
     
     private var seriesContent: some View {
-        Group {
-            if viewModel.isLoadingSeries && viewModel.sonarrSeries.isEmpty {
-                ProgressView("Chargement des séries...")
-            } else if viewModel.sonarrSeries.isEmpty {
-                ContentUnavailableView {
-                    Label("Aucune série", systemImage: "tv")
-                } description: {
-                    Text("Votre bibliothèque Sonarr est vide")
+        LoadableView(
+            state: viewModel.seriesState,
+            emptyIcon: "tv",
+            emptyTitle: "Aucune série",
+            emptyDescription: "Votre bibliothèque Sonarr est vide",
+            onRetry: {
+                Task {
+                    await viewModel.loadSeries()
                 }
-            } else {
-                seriesList
             }
+        ) { series in
+            seriesList(series: series)
         }
     }
     
-    private var moviesList: some View {
+    private func moviesList(movies: [LibraryViewModel.MovieWithInstance]) -> some View {
         ScrollView {
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 12)], spacing: 16) {
-                ForEach(viewModel.radarrMovies) { item in
+                ForEach(movies) { item in
                     NavigationLink {
                         MovieDetailView(movie: item.movie, instance: item.instance)
                     } label: {
@@ -84,10 +84,10 @@ struct LibraryView: View {
         }
     }
     
-    private var seriesList: some View {
+    private func seriesList(series: [LibraryViewModel.SeriesWithInstance]) -> some View {
         ScrollView {
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 12)], spacing: 16) {
-                ForEach(viewModel.sonarrSeries) { item in
+                ForEach(series) { item in
                     NavigationLink {
                         SeriesDetailView(series: item.series, instance: item.instance)
                     } label: {

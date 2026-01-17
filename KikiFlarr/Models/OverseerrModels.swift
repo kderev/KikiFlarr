@@ -3,6 +3,14 @@ import Foundation
 enum MediaType: String, Codable {
     case movie = "movie"
     case tv = "tv"
+    case person = "person"
+    case unknown
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let rawValue = try container.decode(String.self)
+        self = MediaType(rawValue: rawValue) ?? .unknown
+    }
 }
 
 struct OverseerrSearchResults: Codable {

@@ -13,8 +13,8 @@ struct OverseerrSearchResults: Codable {
 
     enum CodingKeys: String, CodingKey {
         case page
-        case totalPages = "total_pages"
-        case totalResults = "total_results"
+        case totalPages
+        case totalResults
         case results
     }
 }
@@ -49,24 +49,24 @@ struct OverseerrSearchResult: Codable, Identifiable {
 
     enum CodingKeys: String, CodingKey {
         case id
-        case mediaType = "media_type"
+        case mediaType
         case popularity
-        case posterPath = "poster_path"
-        case backdropPath = "backdrop_path"
-        case voteCount = "vote_count"
-        case voteAverage = "vote_average"
-        case genreIds = "genre_ids"
+        case posterPath
+        case backdropPath
+        case voteCount
+        case voteAverage
+        case genreIds
         case overview
-        case originalLanguage = "original_language"
+        case originalLanguage
         case title
-        case originalTitle = "original_title"
-        case releaseDate = "release_date"
+        case originalTitle
+        case releaseDate
         case adult
         case video
         case name
-        case originalName = "original_name"
-        case firstAirDate = "first_air_date"
-        case originCountry = "origin_country"
+        case originalName
+        case firstAirDate
+        case originCountry
         case mediaInfo = "media"
     }
 
@@ -439,23 +439,12 @@ struct OverseerrProductionCompany: Codable, Identifiable {
 struct OverseerrProductionCountry: Codable {
     let iso31661: String?
     let name: String?
-    
-    enum CodingKeys: String, CodingKey {
-        case iso31661 = "iso_3166_1"
-        case name
-    }
 }
 
 struct OverseerrSpokenLanguage: Codable {
     let englishName: String?
     let iso6391: String?
     let name: String?
-    
-    enum CodingKeys: String, CodingKey {
-        case englishName = "english_name"
-        case iso6391 = "iso_639_1"
-        case name
-    }
 }
 
 struct OverseerrCredits: Codable {
@@ -511,11 +500,6 @@ struct OverseerrContentRatings: Codable {
 struct OverseerrContentRating: Codable {
     let iso31661: String?
     let rating: String?
-    
-    enum CodingKeys: String, CodingKey {
-        case iso31661 = "iso_3166_1"
-        case rating
-    }
 }
 
 struct OverseerrExternalIds: Codable {
@@ -527,17 +511,6 @@ struct OverseerrExternalIds: Codable {
     let tvdbId: Int?
     let tvrageId: Int?
     let twitterId: String?
-    
-    enum CodingKeys: String, CodingKey {
-        case facebookId = "facebook_id"
-        case freebaseId = "freebase_id"
-        case freebaseMid = "freebase_mid"
-        case imdbId = "imdb_id"
-        case instagramId = "instagram_id"
-        case tvdbId = "tvdb_id"
-        case tvrageId = "tvrage_id"
-        case twitterId = "twitter_id"
-    }
 }
 
 struct OverseerrVideo: Codable, Identifiable {

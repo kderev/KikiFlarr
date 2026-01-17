@@ -4,7 +4,9 @@ struct OnboardingView: View {
     @EnvironmentObject var instanceManager: InstanceManager
     @StateObject private var viewModel = SettingsViewModel()
     @State private var currentStep = 0
-    
+    @State private var testedInstances: [UUID: ConnectionTestResult] = [:]
+    @State private var isTesting = false
+
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
@@ -183,17 +185,9 @@ struct OnboardingView: View {
                     Text("Instances configurées:")
                         .font(.caption)
                         .foregroundColor(.secondary)
-                    
+
                     ForEach(instanceManager.radarrInstances + instanceManager.sonarrInstances) { instance in
-                        HStack {
-                            Image(systemName: instance.serviceType.icon)
-                            Text(instance.name)
-                        }
-                        .font(.caption)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 4)
-                        .background(Color.secondary.opacity(0.1))
-                        .clipShape(Capsule())
+                        instanceStatusRow(for: instance)
                     }
                 }
             }
@@ -265,16 +259,42 @@ struct OnboardingView: View {
 
             if !instanceManager.qbittorrentInstances.isEmpty {
                 ForEach(instanceManager.qbittorrentInstances) { instance in
-                    HStack {
-                        Image(systemName: "checkmark.circle.fill")
-                            .foregroundColor(.green)
-                        Text(instance.name)
-                    }
-                    .font(.subheadline)
+                    instanceStatusRow(for: instance)
                 }
             }
 
             Spacer()
+
+            // Section de test des connexions
+            if hasConfiguredInstances {
+                VStack(spacing: 12) {
+                    Button {
+                        Task {
+                            await testAllInstances()
+                        }
+                    } label: {
+                        HStack {
+                            if isTesting {
+                                ProgressView()
+                                    .padding(.trailing, 4)
+                            }
+                            Text(isTesting ? "Test en cours..." : "Tester toutes les connexions")
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.orange)
+                        .foregroundColor(.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                    }
+                    .disabled(isTesting)
+                    .padding(.horizontal, 40)
+
+                    // Affichage des résultats de test
+                    if !testedInstances.isEmpty {
+                        connectionTestResults
+                    }
+                }
+            }
 
             VStack(spacing: 12) {
                 Button {
@@ -299,27 +319,31 @@ struct OnboardingView: View {
                             .foregroundColor(.orange)
 
                         VStack(alignment: .leading, spacing: 4) {
-                            Label("Au moins une instance Overseerr", systemImage: "checkmark.circle")
+                            Label("Au moins une instance Overseerr", systemImage: hasOverseerr ? "checkmark.circle.fill" : "xmark.circle")
                                 .font(.caption)
-                                .foregroundColor(instanceManager.overseerrInstances.isEmpty ? .red : .green)
+                                .foregroundColor(hasOverseerr ? .green : .red)
 
-                            Label("Au moins une instance Radarr ou Sonarr", systemImage: "checkmark.circle")
+                            Label("Au moins une instance Radarr ou Sonarr", systemImage: hasRadarrOrSonarr ? "checkmark.circle.fill" : "xmark.circle")
                                 .font(.caption)
-                                .foregroundColor((instanceManager.radarrInstances.isEmpty && instanceManager.sonarrInstances.isEmpty) ? .red : .green)
+                                .foregroundColor(hasRadarrOrSonarr ? .green : .red)
+
+                            Label("Au moins une connexion testée avec succès", systemImage: hasSuccessfulTest ? "checkmark.circle.fill" : "xmark.circle")
+                                .font(.caption)
+                                .foregroundColor(hasSuccessfulTest ? .green : .orange)
                         }
                     }
                     .padding(.horizontal, 40)
                 } else {
                     VStack(spacing: 4) {
                         HStack {
-                            Image(systemName: "info.circle.fill")
-                                .foregroundColor(.blue)
-                            Text("Conseil important")
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundColor(.green)
+                            Text("Configuration validée!")
                                 .font(.caption)
                                 .fontWeight(.semibold)
                         }
 
-                        Text("Testez vos connexions depuis les paramètres pour vous assurer que tout fonctionne correctement")
+                        Text("Toutes les instances configurées sont opérationnelles")
                             .font(.caption)
                             .foregroundColor(.secondary)
                             .multilineTextAlignment(.center)
@@ -380,13 +404,12 @@ struct OnboardingView: View {
             }
             .padding(.horizontal, 40)
             
-            if let instance = instanceManager.instances(of: serviceType).first {
-                HStack {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(.green)
-                    Text(instance.name)
+            if !instanceManager.instances(of: serviceType).isEmpty {
+                VStack(spacing: 8) {
+                    ForEach(instanceManager.instances(of: serviceType)) { instance in
+                        instanceStatusRow(for: instance)
+                    }
                 }
-                .font(.subheadline)
             }
             
             Spacer()
@@ -427,9 +450,101 @@ struct OnboardingView: View {
         }
     }
     
+    // MARK: - Validation Properties
+
+    private var hasConfiguredInstances: Bool {
+        !instanceManager.instances.isEmpty
+    }
+
+    private var hasOverseerr: Bool {
+        !instanceManager.overseerrInstances.isEmpty
+    }
+
+    private var hasRadarrOrSonarr: Bool {
+        !instanceManager.radarrInstances.isEmpty || !instanceManager.sonarrInstances.isEmpty
+    }
+
+    private var hasSuccessfulTest: Bool {
+        testedInstances.values.contains { $0.success }
+    }
+
     private var hasMinimumConfig: Bool {
-        !instanceManager.overseerrInstances.isEmpty &&
-        (!instanceManager.radarrInstances.isEmpty || !instanceManager.sonarrInstances.isEmpty)
+        hasOverseerr && hasRadarrOrSonarr && hasSuccessfulTest
+    }
+
+    // MARK: - Helper Functions
+
+    private func testAllInstances() async {
+        isTesting = true
+        testedInstances.removeAll()
+
+        // Tester toutes les instances configurées
+        let allInstances = instanceManager.instances
+
+        await withTaskGroup(of: (UUID, ConnectionTestResult).self) { group in
+            for instance in allInstances {
+                group.addTask {
+                    let result = await instanceManager.testConnection(for: instance)
+                    return (instance.id, result)
+                }
+            }
+
+            for await (id, result) in group {
+                testedInstances[id] = result
+            }
+        }
+
+        isTesting = false
+    }
+
+    // MARK: - Helper Views
+
+    private func instanceStatusRow(for instance: ServiceInstance) -> some View {
+        HStack(spacing: 8) {
+            if let result = testedInstances[instance.id] {
+                Image(systemName: result.success ? "checkmark.circle.fill" : "xmark.circle.fill")
+                    .foregroundColor(result.success ? .green : .red)
+            } else {
+                Image(systemName: "circle")
+                    .foregroundColor(.gray)
+            }
+            Text(instance.name)
+                .font(.subheadline)
+        }
+    }
+
+    private var connectionTestResults: some View {
+        VStack(spacing: 8) {
+            ForEach(instanceManager.instances) { instance in
+                if let result = testedInstances[instance.id] {
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack {
+                            Image(systemName: result.success ? "checkmark.circle.fill" : "xmark.circle.fill")
+                                .foregroundColor(result.success ? .green : .red)
+                                .font(.caption)
+
+                            Text("\(instance.name): \(result.message)")
+                                .font(.caption)
+                                .foregroundColor(result.success ? .green : .red)
+
+                            if let time = result.responseTime {
+                                Text(String(format: "%.0f ms", time * 1000))
+                                    .font(.caption2)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+
+                        if !result.success, let suggestion = result.recoverySuggestion {
+                            Text(suggestion)
+                                .font(.caption2)
+                                .foregroundColor(.orange)
+                                .padding(.leading, 20)
+                        }
+                    }
+                    .padding(.horizontal, 40)
+                }
+            }
+        }
     }
 }
 

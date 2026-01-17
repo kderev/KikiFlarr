@@ -55,4 +55,14 @@ struct ConnectionTestResult {
     let success: Bool
     let message: String
     let responseTime: TimeInterval?
+    let httpStatusCode: Int?
+    let recoverySuggestion: String?
+
+    init(success: Bool, message: String, responseTime: TimeInterval? = nil, httpStatusCode: Int? = nil, recoverySuggestion: String? = nil) {
+        self.success = success
+        self.message = message
+        self.responseTime = responseTime
+        self.httpStatusCode = httpStatusCode
+        self.recoverySuggestion = recoverySuggestion
+    }
 }

@@ -53,16 +53,53 @@ actor TMDBService {
     
     func testConnection() async throws -> ConnectionTestResult {
         let start = Date()
-        
-        let url = buildURL(endpoint: "/configuration")
-        let _: TMDBConfiguration = try await request(url)
-        
-        let elapsed = Date().timeIntervalSince(start)
-        return ConnectionTestResult(
-            success: true,
-            message: "Connexion TMDB réussie",
-            responseTime: elapsed
-        )
+
+        do {
+            let url = buildURL(endpoint: "/configuration")
+            let _: TMDBConfiguration = try await request(url)
+
+            let elapsed = Date().timeIntervalSince(start)
+            return ConnectionTestResult(
+                success: true,
+                message: "Connexion TMDB réussie",
+                responseTime: elapsed,
+                httpStatusCode: 200
+            )
+        } catch {
+            let (httpCode, recoverySuggestion) = extractErrorDetails(from: error)
+            return ConnectionTestResult(
+                success: false,
+                message: error.localizedDescription,
+                responseTime: nil,
+                httpStatusCode: httpCode,
+                recoverySuggestion: recoverySuggestion
+            )
+        }
+    }
+
+    private func extractErrorDetails(from error: Error) -> (httpCode: Int?, suggestion: String?) {
+        var suggestion: String? = nil
+        var httpCode: Int? = nil
+
+        if let networkError = error as? NetworkError {
+            suggestion = networkError.recoverySuggestion
+
+            switch networkError {
+            case .serverError(let code):
+                httpCode = code
+            case .unauthorized:
+                httpCode = 401
+                suggestion = "Vérifiez que votre clé API TMDB est correcte et valide"
+            case .notFound:
+                httpCode = 404
+            case .timeout, .noConnection:
+                suggestion = "Vérifiez votre connexion Internet"
+            default:
+                break
+            }
+        }
+
+        return (httpCode, suggestion)
     }
     
     // MARK: - Search Movies

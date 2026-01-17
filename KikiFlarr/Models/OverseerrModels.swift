@@ -10,6 +10,13 @@ struct OverseerrSearchResults: Codable {
     let totalPages: Int
     let totalResults: Int
     let results: [OverseerrSearchResult]
+
+    enum CodingKeys: String, CodingKey {
+        case page
+        case totalPages = "total_pages"
+        case totalResults = "total_results"
+        case results
+    }
 }
 
 struct OverseerrSearchResult: Codable, Identifiable {
@@ -23,42 +30,65 @@ struct OverseerrSearchResult: Codable, Identifiable {
     let genreIds: [Int]?
     let overview: String?
     let originalLanguage: String?
-    
+
     // Movie specific
     let title: String?
     let originalTitle: String?
     let releaseDate: String?
     let adult: Bool?
     let video: Bool?
-    
+
     // TV specific
     let name: String?
     let originalName: String?
     let firstAirDate: String?
     let originCountry: [String]?
-    
+
     // Media info from Overseerr
     let mediaInfo: OverseerrMediaInfo?
-    
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case mediaType = "media_type"
+        case popularity
+        case posterPath = "poster_path"
+        case backdropPath = "backdrop_path"
+        case voteCount = "vote_count"
+        case voteAverage = "vote_average"
+        case genreIds = "genre_ids"
+        case overview
+        case originalLanguage = "original_language"
+        case title
+        case originalTitle = "original_title"
+        case releaseDate = "release_date"
+        case adult
+        case video
+        case name
+        case originalName = "original_name"
+        case firstAirDate = "first_air_date"
+        case originCountry = "origin_country"
+        case mediaInfo = "media"
+    }
+
     var displayTitle: String {
         title ?? name ?? "Inconnu"
     }
-    
+
     var displayYear: String {
         let dateString = releaseDate ?? firstAirDate ?? ""
         return String(dateString.prefix(4))
     }
-    
+
     var fullPosterURL: URL? {
         guard let posterPath = posterPath else { return nil }
         return URL(string: "https://image.tmdb.org/t/p/w500\(posterPath)")
     }
-    
+
     var fullBackdropURL: URL? {
         guard let backdropPath = backdropPath else { return nil }
         return URL(string: "https://image.tmdb.org/t/p/original\(backdropPath)")
     }
-    
+
     var resolvedMediaType: MediaType {
         if let mediaType = mediaType {
             return mediaType

@@ -141,15 +141,44 @@ actor QBittorrentService {
             return ConnectionTestResult(
                 success: true,
                 message: "Connecté - qBittorrent \(version)\(apiType)",
-                responseTime: responseTime
+                responseTime: responseTime,
+                httpStatusCode: 200
             )
         } catch {
+            let (httpCode, recoverySuggestion) = extractErrorDetails(from: error)
             return ConnectionTestResult(
                 success: false,
                 message: error.localizedDescription,
-                responseTime: nil
+                responseTime: nil,
+                httpStatusCode: httpCode,
+                recoverySuggestion: recoverySuggestion
             )
         }
+    }
+
+    private func extractErrorDetails(from error: Error) -> (httpCode: Int?, suggestion: String?) {
+        var suggestion: String? = nil
+        var httpCode: Int? = nil
+
+        if let networkError = error as? NetworkError {
+            suggestion = networkError.recoverySuggestion
+
+            switch networkError {
+            case .serverError(let code):
+                httpCode = code
+            case .unauthorized:
+                httpCode = 403
+                suggestion = "Vérifiez que vos identifiants (nom d'utilisateur et mot de passe) sont corrects"
+            case .notFound:
+                httpCode = 404
+            case .timeout, .noConnection:
+                suggestion = (suggestion ?? "") + "\n• Vérifiez que vous êtes connecté au VPN si nécessaire\n• Vérifiez l'URL du reverse proxy si utilisé"
+            default:
+                break
+            }
+        }
+
+        return (httpCode, suggestion)
     }
     
     // MARK: - Torrents

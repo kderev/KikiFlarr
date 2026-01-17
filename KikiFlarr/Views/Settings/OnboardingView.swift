@@ -230,22 +230,22 @@ struct OnboardingView: View {
     private var qbittorrentStep: some View {
         VStack(spacing: 20) {
             Spacer()
-            
+
             Image(systemName: "arrow.down.circle.fill")
                 .font(.system(size: 60))
                 .foregroundColor(.green)
-            
+
             VStack(spacing: 8) {
                 Text("Configurer qBittorrent")
                     .font(.title2)
                     .fontWeight(.bold)
-                
+
                 Text("Optionnel - pour suivre vos téléchargements")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
             }
-            
+
             Button {
                 viewModel.resetForm()
                 viewModel.instanceType = .qbittorrent
@@ -262,7 +262,7 @@ struct OnboardingView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 10))
             }
             .padding(.horizontal, 40)
-            
+
             if !instanceManager.qbittorrentInstances.isEmpty {
                 ForEach(instanceManager.qbittorrentInstances) { instance in
                     HStack {
@@ -273,29 +273,59 @@ struct OnboardingView: View {
                     .font(.subheadline)
                 }
             }
-            
+
             Spacer()
-            
-            Button {
-                // Onboarding terminé
-            } label: {
-                Text("Terminer")
-                    .font(.headline)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(hasMinimumConfig ? Color.blue : Color.gray)
-                    .foregroundColor(.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-            }
-            .disabled(!hasMinimumConfig)
-            .padding(.horizontal, 40)
-            
-            if !hasMinimumConfig {
-                Text("Vous devez configurer au moins Overseerr et une instance Radarr ou Sonarr")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal)
+
+            VStack(spacing: 12) {
+                Button {
+                    // Onboarding terminé
+                } label: {
+                    Text("Terminer")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(hasMinimumConfig ? Color.blue : Color.gray)
+                        .foregroundColor(.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                }
+                .disabled(!hasMinimumConfig)
+                .padding(.horizontal, 40)
+
+                if !hasMinimumConfig {
+                    VStack(spacing: 8) {
+                        Text("Configuration minimale requise:")
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.orange)
+
+                        VStack(alignment: .leading, spacing: 4) {
+                            Label("Au moins une instance Overseerr", systemImage: "checkmark.circle")
+                                .font(.caption)
+                                .foregroundColor(instanceManager.overseerrInstances.isEmpty ? .red : .green)
+
+                            Label("Au moins une instance Radarr ou Sonarr", systemImage: "checkmark.circle")
+                                .font(.caption)
+                                .foregroundColor((instanceManager.radarrInstances.isEmpty && instanceManager.sonarrInstances.isEmpty) ? .red : .green)
+                        }
+                    }
+                    .padding(.horizontal, 40)
+                } else {
+                    VStack(spacing: 4) {
+                        HStack {
+                            Image(systemName: "info.circle.fill")
+                                .foregroundColor(.blue)
+                            Text("Conseil important")
+                                .font(.caption)
+                                .fontWeight(.semibold)
+                        }
+
+                        Text("Testez vos connexions depuis les paramètres pour vous assurer que tout fonctionne correctement")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                    }
+                    .padding(.horizontal, 40)
+                }
             }
         }
         .padding()

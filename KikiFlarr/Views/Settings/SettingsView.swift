@@ -393,21 +393,46 @@ struct OptimizedSecureField: View {
 
 struct TestResultView: View {
     let result: ConnectionTestResult
-    
+
     var body: some View {
-        HStack {
-            Image(systemName: result.success ? "checkmark.circle.fill" : "xmark.circle.fill")
-                .foregroundColor(result.success ? .green : .red)
-            
-            VStack(alignment: .leading) {
-                Text(result.message)
-                    .font(.subheadline)
-                
-                if let time = result.responseTime {
-                    Text(String(format: "%.0f ms", time * 1000))
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Image(systemName: result.success ? "checkmark.circle.fill" : "xmark.circle.fill")
+                    .foregroundColor(result.success ? .green : .red)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(result.message)
+                        .font(.subheadline)
+
+                    HStack(spacing: 8) {
+                        if let time = result.responseTime {
+                            Text(String(format: "%.0f ms", time * 1000))
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+
+                        if let httpCode = result.httpStatusCode {
+                            Text("HTTP \(httpCode)")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+            }
+
+            if !result.success, let suggestion = result.recoverySuggestion {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Suggestions:")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.orange)
+
+                    Text(suggestion)
                         .font(.caption)
                         .foregroundColor(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
+                .padding(.top, 4)
             }
         }
     }

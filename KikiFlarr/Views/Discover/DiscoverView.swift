@@ -331,23 +331,25 @@ struct SearchResultsView: View {
     @EnvironmentObject var instanceManager: InstanceManager
     @StateObject private var viewModel = SearchViewModel()
     let query: String
-    
+
     var body: some View {
-        Group {
-            if viewModel.isLoading {
-                ProgressView("Recherche...")
-            } else if viewModel.searchResults.isEmpty {
-                ContentUnavailableView.search(text: query)
-            } else {
-                List(viewModel.searchResults) { result in
-                    NavigationLink {
-                        DetailsView(searchResult: result)
-                    } label: {
-                        SearchResultCard(result: result)
-                    }
-                }
-                .listStyle(.plain)
+        LoadableView(
+            state: viewModel.state,
+            emptyIcon: "magnifyingglass",
+            emptyTitle: "Aucun résultat",
+            emptyDescription: "Aucun résultat pour '\(query)'",
+            onRetry: {
+                viewModel.search()
             }
+        ) { results in
+            List(results) { result in
+                NavigationLink {
+                    DetailsView(searchResult: result)
+                } label: {
+                    SearchResultCard(result: result)
+                }
+            }
+            .listStyle(.plain)
         }
         .navigationTitle("Résultats")
         .onAppear {

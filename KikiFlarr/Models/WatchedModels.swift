@@ -134,6 +134,7 @@ struct WatchedEpisode: Codable, Identifiable, Equatable {
     let seriesTmdbId: Int // ID de la série TMDB
     let seriesTitle: String
     let seriesPosterURL: String?
+    let seriesTotalEpisodes: Int? // Nombre total d'épisodes de la série
     let episodeTitle: String
     let seasonNumber: Int
     let episodeNumber: Int
@@ -150,6 +151,7 @@ struct WatchedEpisode: Codable, Identifiable, Equatable {
         seriesTmdbId: Int,
         seriesTitle: String,
         seriesPosterURL: String? = nil,
+        seriesTotalEpisodes: Int? = nil,
         episodeTitle: String,
         seasonNumber: Int,
         episodeNumber: Int,
@@ -165,6 +167,7 @@ struct WatchedEpisode: Codable, Identifiable, Equatable {
         self.seriesTmdbId = seriesTmdbId
         self.seriesTitle = seriesTitle
         self.seriesPosterURL = seriesPosterURL
+        self.seriesTotalEpisodes = seriesTotalEpisodes
         self.episodeTitle = episodeTitle
         self.seasonNumber = seasonNumber
         self.episodeNumber = episodeNumber

@@ -231,7 +231,30 @@ class WatchedViewModel: ObservableObject {
         let uniqueSeriesFromEpisodes = Set(watchedEpisodes.map { $0.seriesTmdbId }).count
         // totalSeries = max entre les séries marquées comme vues et les séries uniques des épisodes
         newStats.totalSeries = max(watchedSeries.count, uniqueSeriesFromEpisodes)
-        newStats.completedSeries = watchedSeries.filter { $0.isCompleted }.count
+
+        // Calculer les séries terminées
+        // 1. Séries complètes dans watchedSeries
+        var completedSeriesIds = Set(watchedSeries.filter { $0.isCompleted }.map { $0.tvdbId })
+
+        // 2. Séries terminées via les épisodes individuels
+        // Regrouper les épisodes par série
+        var episodesBySeries: [Int: [WatchedEpisode]] = [:]
+        for episode in watchedEpisodes {
+            episodesBySeries[episode.seriesTmdbId, default: []].append(episode)
+        }
+
+        // Vérifier si une série est terminée via ses épisodes
+        for (seriesId, episodes) in episodesBySeries {
+            // Prendre le seriesTotalEpisodes du premier épisode qui l'a
+            if let totalEpisodes = episodes.compactMap({ $0.seriesTotalEpisodes }).first,
+               totalEpisodes > 0,
+               episodes.count >= totalEpisodes {
+                // Cette série est terminée via les épisodes
+                completedSeriesIds.insert(seriesId)
+            }
+        }
+
+        newStats.completedSeries = completedSeriesIds.count
         
         // Compter par genre (séries)
         var seriesGenreCounts: [String: Int] = [:]
@@ -552,7 +575,14 @@ class WatchedViewModel: ObservableObject {
         
         // Longue Haleine (série de plus de 100 épisodes)
         if !isBadgeUnlocked("series_long") {
-            let hasLongSeries = watchedSeries.contains { $0.totalEpisodes >= 100 }
+            // Vérifier dans watchedSeries
+            var hasLongSeries = watchedSeries.contains { $0.totalEpisodes >= 100 }
+
+            // Vérifier aussi dans les épisodes individuels
+            if !hasLongSeries {
+                hasLongSeries = watchedEpisodes.contains { ($0.seriesTotalEpisodes ?? 0) >= 100 }
+            }
+
             if hasLongSeries {
                 if let badge = BadgeDefinitions.seriesSpecialBadges.first(where: { $0.id == "series_long" }) {
                     newlyUnlocked.append(badge)

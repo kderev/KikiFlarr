@@ -12,16 +12,29 @@ class WatchedViewModel: ObservableObject {
     @Published var stats: WatchedStats = WatchedStats()
     @Published var recentlyUnlockedBadge: Badge?
     @Published var showBadgeUnlockAnimation = false
-    
+
     private let storage = WatchedStorageService.shared
-    
+    private weak var instanceManager: InstanceManager?
+    private var hasMigrated = false
+
     init() {
         loadData()
         setupAllBadges()
     }
-    
+
+    func setInstanceManager(_ manager: InstanceManager) {
+        self.instanceManager = manager
+        // Lancer la migration après avoir reçu l'InstanceManager
+        if !hasMigrated {
+            hasMigrated = true
+            Task {
+                await migrateEpisodesTotalEpisodes()
+            }
+        }
+    }
+
     // MARK: - Chargement des données
-    
+
     func loadData() {
         watchedMovies = storage.loadWatchedMovies()
         watchedSeries = storage.loadWatchedSeries()
@@ -30,6 +43,68 @@ class WatchedViewModel: ObservableObject {
         updateStats()
         checkForNewBadges()
         updateAllBadgesStatus()
+    }
+
+    // MARK: - Migration des épisodes (ajout seriesTotalEpisodes)
+
+    private func migrateEpisodesTotalEpisodes() async {
+        guard let tmdbService = instanceManager?.tmdbService() else { return }
+
+        // Trouver les séries uniques qui n'ont pas de seriesTotalEpisodes
+        var seriesNeedingMigration: [Int: String] = [:] // seriesTmdbId -> seriesTitle
+        for episode in watchedEpisodes {
+            if episode.seriesTotalEpisodes == nil {
+                seriesNeedingMigration[episode.seriesTmdbId] = episode.seriesTitle
+            }
+        }
+
+        guard !seriesNeedingMigration.isEmpty else { return }
+
+        var updatedEpisodes = watchedEpisodes
+        var hasChanges = false
+
+        // Pour chaque série, récupérer le nombre total d'épisodes
+        for (seriesTmdbId, _) in seriesNeedingMigration {
+            do {
+                let tvShow = try await tmdbService.getTVShowDetails(id: seriesTmdbId)
+                guard let totalEpisodes = tvShow.numberOfEpisodes, totalEpisodes > 0 else { continue }
+
+                // Mettre à jour tous les épisodes de cette série
+                for i in updatedEpisodes.indices {
+                    if updatedEpisodes[i].seriesTmdbId == seriesTmdbId && updatedEpisodes[i].seriesTotalEpisodes == nil {
+                        let oldEpisode = updatedEpisodes[i]
+                        updatedEpisodes[i] = WatchedEpisode(
+                            id: oldEpisode.id,
+                            tmdbId: oldEpisode.tmdbId,
+                            seriesTmdbId: oldEpisode.seriesTmdbId,
+                            seriesTitle: oldEpisode.seriesTitle,
+                            seriesPosterURL: oldEpisode.seriesPosterURL,
+                            seriesTotalEpisodes: totalEpisodes,
+                            episodeTitle: oldEpisode.episodeTitle,
+                            seasonNumber: oldEpisode.seasonNumber,
+                            episodeNumber: oldEpisode.episodeNumber,
+                            runtime: oldEpisode.runtime,
+                            stillURL: oldEpisode.stillURL,
+                            overview: oldEpisode.overview,
+                            watchedDate: oldEpisode.watchedDate,
+                            rating: oldEpisode.rating,
+                            notes: oldEpisode.notes
+                        )
+                        hasChanges = true
+                    }
+                }
+            } catch {
+                print("Erreur lors de la migration de la série \(seriesTmdbId): \(error)")
+            }
+        }
+
+        // Sauvegarder les changements
+        if hasChanges {
+            watchedEpisodes = updatedEpisodes
+            storage.saveWatchedEpisodes(updatedEpisodes)
+            updateStats()
+            checkForNewBadges()
+        }
     }
     
     private func setupAllBadges() {

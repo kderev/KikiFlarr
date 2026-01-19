@@ -52,6 +52,9 @@ struct ContentView: View {
             }
         }
         .environmentObject(watchedViewModel)
+        .onAppear {
+            watchedViewModel.setInstanceManager(instanceManager)
+        }
     }
 }
 

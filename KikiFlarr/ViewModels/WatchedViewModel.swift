@@ -226,7 +226,10 @@ class WatchedViewModel: ObservableObject {
         newStats.uniqueGenres = uniqueGenres
         
         // Statistiques séries
-        newStats.totalSeries = watchedSeries.count
+        // Compter les séries uniques des épisodes regardés (par seriesTmdbId)
+        let uniqueSeriesFromEpisodes = Set(watchedEpisodes.map { $0.seriesTmdbId }).count
+        // totalSeries = max entre les séries marquées comme vues et les séries uniques des épisodes
+        newStats.totalSeries = max(watchedSeries.count, uniqueSeriesFromEpisodes)
         newStats.completedSeries = watchedSeries.filter { $0.isCompleted }.count
         
         // Compter par genre (séries)

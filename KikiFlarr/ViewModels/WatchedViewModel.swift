@@ -233,28 +233,40 @@ class WatchedViewModel: ObservableObject {
         newStats.totalSeries = max(watchedSeries.count, uniqueSeriesFromEpisodes)
 
         // Calculer les séries terminées
-        // 1. Séries complètes dans watchedSeries
-        var completedSeriesIds = Set(watchedSeries.filter { $0.isCompleted }.map { $0.tvdbId })
+        // Utiliser un Set de titres normalisés pour éviter les doublons
+        var completedSeriesTitles = Set<String>()
 
-        // 2. Séries terminées via les épisodes individuels
-        // Regrouper les épisodes par série
-        var episodesBySeries: [Int: [WatchedEpisode]] = [:]
-        for episode in watchedEpisodes {
-            episodesBySeries[episode.seriesTmdbId, default: []].append(episode)
+        // 1. Séries complètes dans watchedSeries (marquées comme complètes)
+        for series in watchedSeries where series.isCompleted {
+            completedSeriesTitles.insert(series.title.lowercased())
         }
 
-        // Vérifier si une série est terminée via ses épisodes
-        for (seriesId, episodes) in episodesBySeries {
-            // Prendre le seriesTotalEpisodes du premier épisode qui l'a
+        // 2. Regrouper les épisodes par série (par titre normalisé)
+        var episodesBySeriesTitle: [String: [WatchedEpisode]] = [:]
+        for episode in watchedEpisodes {
+            let normalizedTitle = episode.seriesTitle.lowercased()
+            episodesBySeriesTitle[normalizedTitle, default: []].append(episode)
+        }
+
+        // 3. Vérifier les séries terminées via les épisodes
+        for (seriesTitle, episodes) in episodesBySeriesTitle {
+            // D'abord essayer avec seriesTotalEpisodes (nouvelles données)
             if let totalEpisodes = episodes.compactMap({ $0.seriesTotalEpisodes }).first,
                totalEpisodes > 0,
                episodes.count >= totalEpisodes {
-                // Cette série est terminée via les épisodes
-                completedSeriesIds.insert(seriesId)
+                completedSeriesTitles.insert(seriesTitle)
+                continue
+            }
+
+            // Sinon, essayer de trouver le totalEpisodes dans watchedSeries (anciennes données)
+            if let matchingSeries = watchedSeries.first(where: { $0.title.lowercased() == seriesTitle }),
+               matchingSeries.totalEpisodes > 0,
+               episodes.count >= matchingSeries.totalEpisodes {
+                completedSeriesTitles.insert(seriesTitle)
             }
         }
 
-        newStats.completedSeries = completedSeriesIds.count
+        newStats.completedSeries = completedSeriesTitles.count
         
         // Compter par genre (séries)
         var seriesGenreCounts: [String: Int] = [:]
@@ -578,9 +590,17 @@ class WatchedViewModel: ObservableObject {
             // Vérifier dans watchedSeries
             var hasLongSeries = watchedSeries.contains { $0.totalEpisodes >= 100 }
 
-            // Vérifier aussi dans les épisodes individuels
+            // Vérifier aussi dans les épisodes individuels (nouvelles données)
             if !hasLongSeries {
                 hasLongSeries = watchedEpisodes.contains { ($0.seriesTotalEpisodes ?? 0) >= 100 }
+            }
+
+            // Vérifier via correspondance de titre avec watchedSeries (anciennes données)
+            if !hasLongSeries {
+                let uniqueSeriesTitles = Set(watchedEpisodes.map { $0.seriesTitle.lowercased() })
+                hasLongSeries = watchedSeries.contains { series in
+                    series.totalEpisodes >= 100 && uniqueSeriesTitles.contains(series.title.lowercased())
+                }
             }
 
             if hasLongSeries {

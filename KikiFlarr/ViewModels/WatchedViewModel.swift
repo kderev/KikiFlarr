@@ -27,7 +27,8 @@ class WatchedViewModel: ObservableObject {
         watchedSeries = storage.loadWatchedSeries()
         watchedEpisodes = storage.loadWatchedEpisodes()
         unlockedBadges = storage.loadUnlockedBadges()
-        stats = storage.loadStats()
+        updateStats()
+        checkForNewBadges()
         updateAllBadgesStatus()
     }
     

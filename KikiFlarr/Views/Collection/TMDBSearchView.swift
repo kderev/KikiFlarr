@@ -952,6 +952,7 @@ struct SeasonEpisodesView: View {
             seriesTmdbId: series.id,
             seriesTitle: series.name,
             seriesPosterURL: series.posterURL?.absoluteString,
+            seriesTotalEpisodes: series.numberOfEpisodes,
             episodeTitle: episode.name,
             seasonNumber: episode.seasonNumber,
             episodeNumber: episode.episodeNumber,

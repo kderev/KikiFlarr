@@ -58,12 +58,3 @@ struct CheckDownloadsIntent: AppIntent {
         return .result()
     }
 }
-
-// MARK: - Helper pour enregistrer les raccourcis
-
-/// Fonction helper pour mettre à jour les raccourcis Siri
-/// Appelée depuis KikiFlarrApp.init()
-@available(iOS 16.0, *)
-func updateSiriShortcuts() {
-    AppShortcuts.updateAppShortcutParameters()
-}

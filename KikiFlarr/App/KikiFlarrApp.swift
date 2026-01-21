@@ -1,5 +1,4 @@
 import SwiftUI
-import AppIntents
 
 @main
 struct KikiFlarrApp: App {
@@ -8,11 +7,6 @@ struct KikiFlarrApp: App {
     init() {
         // Initialiser le service de notifications au lancement
         _ = NotificationService.shared
-
-        // Enregistrer les raccourcis Siri
-        if #available(iOS 16.0, *) {
-            updateSiriShortcuts()
-        }
     }
 
     var body: some Scene {

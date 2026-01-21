@@ -3,15 +3,18 @@ import SwiftUI
 struct SettingsView: View {
     @EnvironmentObject var instanceManager: InstanceManager
     @StateObject private var viewModel = SettingsViewModel()
+    @StateObject private var notificationService = NotificationService.shared
     @State private var showTMDBSheet = false
-    
+
     var body: some View {
         NavigationStack {
             List {
                 tmdbSection
-                
+
+                notificationsSection
+
                 instancesSection
-                
+
                 aboutSection
             }
             .navigationTitle("Paramètres")
@@ -87,7 +90,70 @@ struct SettingsView: View {
             Text("Configurez TMDB pour pouvoir marquer des films comme vus, même s'ils ne sont pas dans votre bibliothèque")
         }
     }
-    
+
+    private var notificationsSection: some View {
+        Section {
+            Toggle(isOn: $notificationService.downloadNotificationsEnabled) {
+                HStack {
+                    Image(systemName: "bell.badge.fill")
+                        .foregroundColor(.orange)
+                        .frame(width: 28)
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Téléchargements terminés")
+                            .foregroundColor(.primary)
+                        Text("Recevoir une notification")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
+            .disabled(!notificationService.isAuthorized && notificationService.authorizationStatus != .notDetermined)
+
+            if notificationService.authorizationStatus == .denied {
+                Button {
+                    if let url = URL(string: UIApplication.openSettingsURLString) {
+                        UIApplication.shared.open(url)
+                    }
+                } label: {
+                    HStack {
+                        Image(systemName: "gear")
+                            .foregroundColor(.blue)
+                            .frame(width: 28)
+                        Text("Activer dans les réglages")
+                        Spacer()
+                        Image(systemName: "arrow.up.right.square")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+            } else if notificationService.authorizationStatus == .notDetermined {
+                Button {
+                    Task {
+                        _ = await notificationService.requestAuthorization()
+                    }
+                } label: {
+                    HStack {
+                        Image(systemName: "bell")
+                            .foregroundColor(.blue)
+                            .frame(width: 28)
+                        Text("Autoriser les notifications")
+                    }
+                }
+            }
+        } header: {
+            Text("Notifications")
+        } footer: {
+            if notificationService.authorizationStatus == .denied {
+                Text("Les notifications sont désactivées. Activez-les dans les réglages pour recevoir des alertes.")
+            } else if notificationService.authorizationStatus == .notDetermined {
+                Text("Autorisez les notifications pour être alerté quand un téléchargement se termine.")
+            } else {
+                Text("Recevez une notification push quand un téléchargement qBittorrent se termine.")
+            }
+        }
+    }
+
     private var instancesSection: some View {
         Group {
             if instanceManager.instances.isEmpty && instanceManager.groups.isEmpty {

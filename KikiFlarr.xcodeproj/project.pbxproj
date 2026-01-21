@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		S1R1INT3NT00001BF /* SearchAndDownloadIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = S1R1INT3NT00001FR /* SearchAndDownloadIntent.swift */; };
+		S1R1INT3NT00002BF /* AppShortcuts.swift in Sources */ = {isa = PBXBuildFile; fileRef = S1R1INT3NT00002FR /* AppShortcuts.swift */; };
+		S1R1INT3NT00003BF /* SiriResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = S1R1INT3NT00003FR /* SiriResultView.swift */; };
+		S1R1S3TT1NGS0001BF /* SiriSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = S1R1S3TT1NGS0001FR /* SiriSettingsView.swift */; };
 		0185FA72E89F0CE58EFE561D /* SearchResultCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA7327AFDF96F73332189A41 /* SearchResultCard.swift */; };
 		N0T1F1C4T10NS3RV1C3BF01 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = N0T1F1C4T10NS3RV1C3FR01 /* NotificationService.swift */; };
 		06A027FAB862026445608AE4 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31ADF94E34A9270FEF5E0B19 /* APIClient.swift */; };
@@ -60,6 +64,10 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		S1R1INT3NT00001FR /* SearchAndDownloadIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchAndDownloadIntent.swift; sourceTree = "<group>"; };
+		S1R1INT3NT00002FR /* AppShortcuts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppShortcuts.swift; sourceTree = "<group>"; };
+		S1R1INT3NT00003FR /* SiriResultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiriResultView.swift; sourceTree = "<group>"; };
+		S1R1S3TT1NGS0001FR /* SiriSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiriSettingsView.swift; sourceTree = "<group>"; };
 		03A4C8031B7A744E5199EE48 /* TorrentCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TorrentCard.swift; sourceTree = "<group>"; };
 		N0T1F1C4T10NS3RV1C3FR01 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		102C13B05D1ADA17B72A7010 /* Formatters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Formatters.swift; sourceTree = "<group>"; };
@@ -119,6 +127,7 @@
 			isa = PBXGroup;
 			children = (
 				7CFF1CA2491CFF49F7704240 /* App */,
+				S1R1INT3NTSGR0UP /* Intents */,
 				C140834E33D18B1B2613D5A3 /* Models */,
 				8F26FA314A73EB6EE7BCDAD7 /* Resources */,
 				71BE290BCB96F6F00D5DEA7F /* Services */,
@@ -128,6 +137,16 @@
 				70F6B00E0A169ABCBF740972 /* Info.plist */,
 			);
 			path = KikiFlarr;
+			sourceTree = "<group>";
+		};
+		S1R1INT3NTSGR0UP /* Intents */ = {
+			isa = PBXGroup;
+			children = (
+				S1R1INT3NT00002FR /* AppShortcuts.swift */,
+				S1R1INT3NT00001FR /* SearchAndDownloadIntent.swift */,
+				S1R1INT3NT00003FR /* SiriResultView.swift */,
+			);
+			path = Intents;
 			sourceTree = "<group>";
 		};
 		1F797EF1AD3CF092BE5A2E29 /* Library */ = {
@@ -305,6 +324,7 @@
 			children = (
 				65E2CA011C2E84A4CF9D5EEA /* OnboardingView.swift */,
 				B01DD648666F66DF8F489B8A /* SettingsView.swift */,
+				S1R1S3TT1NGS0001FR /* SiriSettingsView.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -427,6 +447,10 @@
 				9F8533B38C21D8EAF3D2770F /* WatchedViewModel.swift in Sources */,
 				673CEBC5DA1C44C4B9CFD45A /* LoadableState.swift in Sources */,
 				A5E538ADBF714D7889FBB497 /* LoadableView.swift in Sources */,
+				S1R1INT3NT00001BF /* SearchAndDownloadIntent.swift in Sources */,
+				S1R1INT3NT00002BF /* AppShortcuts.swift in Sources */,
+				S1R1INT3NT00003BF /* SiriResultView.swift in Sources */,
+				S1R1S3TT1NGS0001BF /* SiriSettingsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

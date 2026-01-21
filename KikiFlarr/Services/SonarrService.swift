@@ -148,10 +148,11 @@ actor SonarrService {
 
     // MARK: - Calendar
 
-    func getCalendar(startDate: String, endDate: String) async throws -> [SonarrCalendarEpisode] {
+    func getCalendar(startDate: String, endDate: String, includeUnmonitored: Bool = true) async throws -> [SonarrCalendarEpisode] {
         let url = try buildURL(path: "/calendar", queryItems: [
             URLQueryItem(name: "start", value: startDate),
             URLQueryItem(name: "end", value: endDate),
+            URLQueryItem(name: "includeUnmonitored", value: includeUnmonitored ? "true" : "false"),
             URLQueryItem(name: "includeSeries", value: "true"),
             URLQueryItem(name: "includeEpisodeFile", value: "true")
         ])

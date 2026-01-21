@@ -68,7 +68,11 @@ final class SonarrCalendarViewModel: ObservableObject {
                 let profiles = try await service.getQualityProfiles()
                 profilesByInstance[instance.id] = profiles
 
-                let calendarEpisodes = try await service.getCalendar(startDate: startString, endDate: endString)
+                let calendarEpisodes = try await service.getCalendar(
+                    startDate: startString,
+                    endDate: endString,
+                    includeUnmonitored: true
+                )
                 for episode in calendarEpisodes {
                     items.append(CalendarEpisodeItem(episode: episode, instance: instance))
                     if let seriesId = episode.seriesId ?? episode.series?.id,

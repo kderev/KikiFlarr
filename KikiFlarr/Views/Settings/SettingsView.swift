@@ -13,6 +13,8 @@ struct SettingsView: View {
 
                 notificationsSection
 
+                siriSection
+
                 instancesSection
 
                 aboutSection
@@ -150,6 +152,45 @@ struct SettingsView: View {
                 Text("Autorisez les notifications pour être alerté quand un téléchargement se termine.")
             } else {
                 Text("Recevez une notification push quand un téléchargement qBittorrent se termine.")
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var siriSection: some View {
+        if #available(iOS 16.0, *) {
+            Section {
+                NavigationLink {
+                    SiriSettingsView()
+                } label: {
+                    HStack {
+                        Image(systemName: "waveform.circle.fill")
+                            .foregroundStyle(.linearGradient(
+                                colors: [.purple, .blue],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ))
+                            .frame(width: 28)
+
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Siri")
+                                .foregroundColor(.primary)
+                            Text("Commandes vocales")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+
+                        Spacer()
+
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+            } header: {
+                Text("Siri et Raccourcis")
+            } footer: {
+                Text("Dites \"Va chercher Titanic sur KikiFlarr\" pour télécharger directement avec Siri.")
             }
         }
     }

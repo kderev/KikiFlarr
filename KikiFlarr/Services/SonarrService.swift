@@ -152,7 +152,7 @@ actor SonarrService {
         let url = try buildURL(path: "/calendar", queryItems: [
             URLQueryItem(name: "start", value: startDate),
             URLQueryItem(name: "end", value: endDate),
-            URLQueryItem(name: "includeUnmonitored", value: includeUnmonitored ? "true" : "false"),
+            URLQueryItem(name: "unmonitored", value: includeUnmonitored ? "true" : "false"),
             URLQueryItem(name: "includeSeries", value: "true"),
             URLQueryItem(name: "includeEpisodeFile", value: "true")
         ])

@@ -4,10 +4,19 @@ import SwiftUI
 @MainActor
 final class SonarrCalendarViewModel: ObservableObject {
     struct CalendarEpisodeItem: Identifiable, Hashable {
-        let episode: SonarrCalendarEpisode
+        var episode: SonarrCalendarEpisode
         let instance: ServiceInstance
 
         var id: Int { episode.id }
+
+        static func == (lhs: CalendarEpisodeItem, rhs: CalendarEpisodeItem) -> Bool {
+            lhs.id == rhs.id && lhs.instance.id == rhs.instance.id
+        }
+
+        func hash(into hasher: inout Hasher) {
+            hasher.combine(id)
+            hasher.combine(instance.id)
+        }
     }
 
     struct SeriesKey: Hashable {
@@ -74,7 +83,7 @@ final class SonarrCalendarViewModel: ObservableObject {
 
         if items.isEmpty {
             if let lastError {
-                state = .failed(lastError)
+                state = .failed(AppError.from(lastError))
             } else {
                 state = .empty
             }

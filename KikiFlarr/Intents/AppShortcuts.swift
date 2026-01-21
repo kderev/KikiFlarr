@@ -2,7 +2,6 @@ import AppIntents
 
 /// Fournit les raccourcis Siri disponibles pour KikiFlarr
 /// Ces phrases seront suggérées automatiquement aux utilisateurs
-@available(iOS 16.0, *)
 struct AppShortcuts: AppShortcutsProvider {
     static var appShortcuts: [AppShortcut] {
         AppShortcut(
@@ -33,7 +32,6 @@ struct AppShortcuts: AppShortcutsProvider {
 }
 
 /// Intent simple pour juste ouvrir l'app sur la recherche
-@available(iOS 16.0, *)
 struct OpenSearchIntent: AppIntent {
     static var title: LocalizedStringResource = "Ouvrir la recherche"
     static var description = IntentDescription("Ouvre KikiFlarr sur l'écran de recherche")
@@ -46,7 +44,6 @@ struct OpenSearchIntent: AppIntent {
 }
 
 /// Intent pour voir les téléchargements en cours
-@available(iOS 16.0, *)
 struct CheckDownloadsIntent: AppIntent {
     static var title: LocalizedStringResource = "Voir les téléchargements"
     static var description = IntentDescription("Affiche les téléchargements en cours")

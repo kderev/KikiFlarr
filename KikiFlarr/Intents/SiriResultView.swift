@@ -1,7 +1,6 @@
 import SwiftUI
 
 /// Vue affichée dans les résultats Siri
-@available(iOS 16.0, *)
 struct SiriResultView: View {
     let status: SiriResultStatus
     let title: String
@@ -95,7 +94,6 @@ struct SiriResultView: View {
 }
 
 /// Statuts possibles pour le résultat Siri
-@available(iOS 16.0, *)
 enum SiriResultStatus {
     case success           // Téléchargement lancé avec succès
     case alreadyAvailable  // Déjà dans la bibliothèque
@@ -121,27 +119,25 @@ enum SiriResultStatus {
 
 #Preview {
     VStack(spacing: 20) {
-        if #available(iOS 16.0, *) {
-            SiriResultView(
-                status: .success,
-                title: "Titanic",
-                message: "Téléchargement lancé",
-                year: "1997"
-            )
+        SiriResultView(
+            status: .success,
+            title: "Titanic",
+            message: "Téléchargement lancé",
+            year: "1997"
+        )
 
-            SiriResultView(
-                status: .alreadyAvailable,
-                title: "Inception",
-                message: "Déjà disponible",
-                year: "2010"
-            )
+        SiriResultView(
+            status: .alreadyAvailable,
+            title: "Inception",
+            message: "Déjà disponible",
+            year: "2010"
+        )
 
-            SiriResultView(
-                status: .error,
-                title: "Erreur",
-                message: "Connexion impossible"
-            )
-        }
+        SiriResultView(
+            status: .error,
+            title: "Erreur",
+            message: "Connexion impossible"
+        )
     }
     .padding()
     .background(Color(.systemGroupedBackground))

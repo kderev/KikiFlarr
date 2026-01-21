@@ -2,7 +2,6 @@ import SwiftUI
 import AppIntents
 
 /// Vue de configuration des raccourcis Siri
-@available(iOS 16.0, *)
 struct SiriSettingsView: View {
     @State private var showingSiriTips = false
 
@@ -99,7 +98,6 @@ struct SiriSettingsView: View {
 }
 
 /// Vue avec des conseils pour utiliser Siri
-@available(iOS 16.0, *)
 struct SiriTipsView: View {
     var body: some View {
         List {
@@ -192,9 +190,7 @@ struct TipRow: View {
 }
 
 #Preview {
-    if #available(iOS 16.0, *) {
-        NavigationStack {
-            SiriSettingsView()
-        }
+    NavigationStack {
+        SiriSettingsView()
     }
 }

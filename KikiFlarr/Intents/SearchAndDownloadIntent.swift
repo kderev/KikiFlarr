@@ -3,7 +3,6 @@ import Foundation
 
 /// Intent Siri pour rechercher et télécharger un média
 /// Permet de dire : "Va chercher Titanic sur KikiFlarr"
-@available(iOS 16.0, *)
 struct SearchAndDownloadIntent: AppIntent {
     static var title: LocalizedStringResource = "Rechercher et télécharger"
     static var description = IntentDescription("Recherche un film ou une série et lance le téléchargement")
@@ -147,7 +146,6 @@ struct SearchAndDownloadIntent: AppIntent {
 }
 
 /// Paramètre de type de média pour Siri
-@available(iOS 16.0, *)
 enum MediaTypeParameter: String, AppEnum {
     case movie = "movie"
     case series = "series"

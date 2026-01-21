@@ -4,15 +4,15 @@ struct ContentView: View {
     @EnvironmentObject var instanceManager: InstanceManager
     @StateObject private var watchedViewModel = WatchedViewModel()
     @State private var selectedTab: Tab = .discover
-    
-    enum Tab {
+
+    enum Tab: String {
         case discover
         case library
         case collection
         case downloads
         case settings
     }
-    
+
     var body: some View {
         Group {
             if instanceManager.instances.isEmpty {
@@ -24,25 +24,25 @@ struct ContentView: View {
                             Label("Découvrir", systemImage: "sparkles")
                         }
                         .tag(Tab.discover)
-                    
+
                     LibraryView()
                         .tabItem {
                             Label("Bibliothèque", systemImage: "books.vertical")
                         }
                         .tag(Tab.library)
-                    
+
                     CollectionView()
                         .tabItem {
                             Label("Collection", systemImage: "trophy.fill")
                         }
                         .tag(Tab.collection)
-                    
+
                     DownloadsView()
                         .tabItem {
                             Label("Transferts", systemImage: "arrow.down.circle")
                         }
                         .tag(Tab.downloads)
-                    
+
                     SettingsView()
                         .tabItem {
                             Label("Paramètres", systemImage: "gear")
@@ -54,6 +54,19 @@ struct ContentView: View {
         .environmentObject(watchedViewModel)
         .onAppear {
             watchedViewModel.setInstanceManager(instanceManager)
+            checkSiriDeepLink()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
+            checkSiriDeepLink()
+        }
+    }
+
+    /// Vérifie si Siri a demandé l'ouverture d'un onglet spécifique
+    private func checkSiriDeepLink() {
+        if let tabName = UserDefaults.standard.string(forKey: "siri.openTab"),
+           let tab = Tab(rawValue: tabName) {
+            selectedTab = tab
+            UserDefaults.standard.removeObject(forKey: "siri.openTab")
         }
     }
 }

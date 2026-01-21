@@ -19,6 +19,7 @@
 		27DFD8D3EE44C42BD5E1190D /* DiscoverViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CDC9A8B7CAEB3FEA4F04A6E /* DiscoverViewModel.swift */; };
 		2CC51D860C57EEBECF230A07 /* WatchedStorageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEC7A042BD8FD417DAB7BE8C /* WatchedStorageService.swift */; };
 		35F9DB00D96151A52D879CEB /* QBittorrentService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4489C20F26D36A2C6068896F /* QBittorrentService.swift */; };
+		38B6E3F48C4D2B8E9F7D1A01 /* SonarrCalendarViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38B6E3F32D8B4C7AE8E0C8AF /* SonarrCalendarViewModel.swift */; };
 		3FC994EAC2DB3FDB75CFA9F0 /* OverseerrModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6F18CE3EA0A36F8C8D14D10 /* OverseerrModels.swift */; };
 		400B2C1199B3A02F92DB3535 /* SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9CAFCA1B53CDC6108B3C23B /* SettingsViewModel.swift */; };
 		43DFA28D0359119A994E5FBF /* RadarrModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA13A6425158382523B6C22B /* RadarrModels.swift */; };
@@ -45,6 +46,7 @@
 		A8265C85BAD9F15D02ACA95F /* TorrentCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03A4C8031B7A744E5199EE48 /* TorrentCard.swift */; };
 		AFB4D62F1F575AD7C3BCA6F7 /* QBittorrentModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = D67AD7A820F9D70B22D6554C /* QBittorrentModels.swift */; };
 		B6E7F316BBDD48C488CC0292 /* KikiFlarrApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36B0EBEA4B1015EAC4A5937B /* KikiFlarrApp.swift */; };
+		B8C6D2E9E6E4B9E9C1A7F6C0 /* SonarrCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8C6D2E8F1A3E52EFA5B3B4C /* SonarrCalendarView.swift */; };
 		B96FDAD9156659849820537A /* InstanceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A477238107018BABAB9A784 /* InstanceManager.swift */; };
 		BB3697594C5BC137F4440C76 /* AsyncImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A3EA0A8064DAB7653FF8586 /* AsyncImageView.swift */; };
 		BCD898B06BFAC7B71E31B6C2 /* DownloadsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C087736725E679108CDCEEC2 /* DownloadsView.swift */; };
@@ -78,6 +80,7 @@
 		31ADF94E34A9270FEF5E0B19 /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
 		36B0EBEA4B1015EAC4A5937B /* KikiFlarrApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KikiFlarrApp.swift; sourceTree = "<group>"; };
 		36EC5502D7E87FABC4AB78A8 /* LibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryView.swift; sourceTree = "<group>"; };
+		38B6E3F32D8B4C7AE8E0C8AF /* SonarrCalendarViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SonarrCalendarViewModel.swift; sourceTree = "<group>"; };
 		3965C6F8D932322B1D7DFB5F /* OverseerrService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverseerrService.swift; sourceTree = "<group>"; };
 		39ECB2CC61B9C3F2422B1110 /* ImageCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCache.swift; sourceTree = "<group>"; };
 		41ACC7C4A1B794B898CB417D /* KeychainManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainManager.swift; sourceTree = "<group>"; };
@@ -105,6 +108,7 @@
 		B01DD648666F66DF8F489B8A /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		BA13A6425158382523B6C22B /* RadarrModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadarrModels.swift; sourceTree = "<group>"; };
 		BBBF956C2DBF6A5B35BD2684 /* TMDBService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TMDBService.swift; sourceTree = "<group>"; };
+		B8C6D2E8F1A3E52EFA5B3B4C /* SonarrCalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SonarrCalendarView.swift; sourceTree = "<group>"; };
 		C087736725E679108CDCEEC2 /* DownloadsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadsView.swift; sourceTree = "<group>"; };
 		C52E696971197ADC5FA592C1 /* InstanceRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstanceRow.swift; sourceTree = "<group>"; };
 		D67AD7A820F9D70B22D6554C /* QBittorrentModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QBittorrentModels.swift; sourceTree = "<group>"; };
@@ -211,6 +215,7 @@
 		88C69D9D14A1F48C7BB48E66 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				4E7C6A8B2E3E4B8D9E1C2F34 /* Calendar */,
 				D19708FF12F19B72679C3372 /* Collection */,
 				B3F0E8A31990C07B01DFD146 /* Components */,
 				75797C975E7CC6FA6DEC5101 /* Details */,
@@ -221,6 +226,14 @@
 				F4BE117816A935826CF28C27 /* Settings */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		4E7C6A8B2E3E4B8D9E1C2F34 /* Calendar */ = {
+			isa = PBXGroup;
+			children = (
+				B8C6D2E8F1A3E52EFA5B3B4C /* SonarrCalendarView.swift */,
+			);
+			path = Calendar;
 			sourceTree = "<group>";
 		};
 		8F26FA314A73EB6EE7BCDAD7 /* Resources */ = {
@@ -312,6 +325,7 @@
 				5CDC9A8B7CAEB3FEA4F04A6E /* DiscoverViewModel.swift */,
 				6EC2C6EE792F3BD785D0C80F /* DownloadsViewModel.swift */,
 				9EB42C51D5C1F985C3093506 /* LibraryViewModel.swift */,
+				38B6E3F32D8B4C7AE8E0C8AF /* SonarrCalendarViewModel.swift */,
 				E93D0395257CE11A92278DFA /* SearchViewModel.swift */,
 				D9CAFCA1B53CDC6108B3C23B /* SettingsViewModel.swift */,
 				E397340525902F1760415CB7 /* WatchedViewModel.swift */,
@@ -432,6 +446,8 @@
 				0185FA72E89F0CE58EFE561D /* SearchResultCard.swift in Sources */,
 				8B644A9CF30270757F37E7AF /* SearchView.swift in Sources */,
 				58C6EF1BC5B1C2291F416CA7 /* SearchViewModel.swift in Sources */,
+				B8C6D2E9E6E4B9E9C1A7F6C0 /* SonarrCalendarView.swift in Sources */,
+				38B6E3F48C4D2B8E9F7D1A01 /* SonarrCalendarViewModel.swift in Sources */,
 				1DA546DCD349E6F1CDB4E4B3 /* SeriesDetailView.swift in Sources */,
 				4BB469C1EB1A19527190F7E6 /* ServiceInstance.swift in Sources */,
 				807213A35B09A4EB45AC7A00 /* SettingsView.swift in Sources */,

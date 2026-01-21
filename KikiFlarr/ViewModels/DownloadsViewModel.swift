@@ -14,6 +14,9 @@ class DownloadsViewModel: ObservableObject {
 
     private weak var instanceManager: InstanceManager?
     private var refreshTask: Task<Void, Never>?
+
+    // Tracking des états précédents pour détecter les téléchargements terminés
+    private var previousTorrentStates: [String: String] = [:]
     
     struct TorrentWithInstance: Identifiable, Equatable {
         let torrent: QBittorrentTorrent
@@ -73,6 +76,9 @@ class DownloadsViewModel: ObservableObject {
         }
 
         let sortedTorrents = allTorrents.sorted { ($0.torrent.addedOn ?? 0) > ($1.torrent.addedOn ?? 0) }
+
+        // Vérifier les téléchargements terminés et envoyer des notifications
+        await checkForCompletedDownloads(sortedTorrents)
 
         if sortedTorrents.isEmpty {
             state = .empty
@@ -176,5 +182,41 @@ class DownloadsViewModel: ObservableObject {
             // L'erreur sera gérée lors du prochain loadTorrents
             print("Error deleting torrent: \(error.localizedDescription)")
         }
+    }
+
+    // MARK: - Notifications de téléchargement terminé
+
+    private func checkForCompletedDownloads(_ torrents: [TorrentWithInstance]) async {
+        // États qui indiquent un téléchargement en cours
+        let downloadingStates = Set(["downloading", "forcedDL", "metaDL", "stalledDL", "queuedDL", "checkingDL", "allocating"])
+        // États qui indiquent un téléchargement terminé (en seed)
+        let completedStates = Set(["uploading", "forcedUP", "stalledUP", "queuedUP", "checkingUP", "pausedUP", "stoppedUP"])
+
+        for torrentWithInstance in torrents {
+            let torrent = torrentWithInstance.torrent
+            let key = "\(torrentWithInstance.instance.id)-\(torrent.hash)"
+            let currentState = torrent.state
+            let previousState = previousTorrentStates[key]
+
+            // Vérifier si le torrent vient de passer de downloading à completed
+            if let prevState = previousState,
+               downloadingStates.contains(prevState),
+               completedStates.contains(currentState) {
+                // Le téléchargement vient de se terminer
+                await NotificationService.shared.notifyDownloadCompleted(
+                    torrentName: torrent.name,
+                    torrentHash: torrent.hash,
+                    instanceId: torrentWithInstance.instance.id.uuidString,
+                    instanceName: torrentWithInstance.instance.name
+                )
+            }
+
+            // Mettre à jour l'état précédent
+            previousTorrentStates[key] = currentState
+        }
+
+        // Nettoyer les entrées pour les torrents supprimés (limiter la mémoire)
+        let currentKeys = Set(torrents.map { "\($0.instance.id)-\($0.torrent.hash)" })
+        previousTorrentStates = previousTorrentStates.filter { currentKeys.contains($0.key) }
     }
 }

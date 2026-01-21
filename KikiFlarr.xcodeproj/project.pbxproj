@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		0185FA72E89F0CE58EFE561D /* SearchResultCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA7327AFDF96F73332189A41 /* SearchResultCard.swift */; };
+		N0T1F1C4T10NS3RV1C3BF01 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = N0T1F1C4T10NS3RV1C3FR01 /* NotificationService.swift */; };
 		06A027FAB862026445608AE4 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31ADF94E34A9270FEF5E0B19 /* APIClient.swift */; };
 		0ABB48E18157384250326457 /* DetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FA5825E4451F29FC2A478DF /* DetailsView.swift */; };
 		1DA546DCD349E6F1CDB4E4B3 /* SeriesDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84EC1002A4F75923E8C15BEB /* SeriesDetailView.swift */; };
@@ -60,6 +61,7 @@
 
 /* Begin PBXFileReference section */
 		03A4C8031B7A744E5199EE48 /* TorrentCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TorrentCard.swift; sourceTree = "<group>"; };
+		N0T1F1C4T10NS3RV1C3FR01 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		102C13B05D1ADA17B72A7010 /* Formatters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Formatters.swift; sourceTree = "<group>"; };
 		107445F17B02F9CBD02CB2DE /* NetworkError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkError.swift; sourceTree = "<group>"; };
 		12633E2CCCA360F755BB6590 /* RadarrService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadarrService.swift; sourceTree = "<group>"; };
@@ -151,6 +153,7 @@
 			children = (
 				31ADF94E34A9270FEF5E0B19 /* APIClient.swift */,
 				107445F17B02F9CBD02CB2DE /* NetworkError.swift */,
+				N0T1F1C4T10NS3RV1C3FR01 /* NotificationService.swift */,
 				3965C6F8D932322B1D7DFB5F /* OverseerrService.swift */,
 				4489C20F26D36A2C6068896F /* QBittorrentService.swift */,
 				12633E2CCCA360F755BB6590 /* RadarrService.swift */,
@@ -397,6 +400,7 @@
 				DCE0DED791B2D91ADC39D058 /* LibraryViewModel.swift in Sources */,
 				6633175BC530D09CABA1FFE9 /* MovieDetailView.swift in Sources */,
 				CB1618D782D0A3BB3789CB05 /* NetworkError.swift in Sources */,
+				N0T1F1C4T10NS3RV1C3BF01 /* NotificationService.swift in Sources */,
 				8DA4A9C865A316F9631C4799 /* OnboardingView.swift in Sources */,
 				3FC994EAC2DB3FDB75CFA9F0 /* OverseerrModels.swift in Sources */,
 				CD8DB4629477730210AE2997 /* OverseerrService.swift in Sources */,

@@ -8,22 +8,22 @@ struct AppShortcuts: AppShortcutsProvider {
             intent: SearchAndDownloadIntent(),
             phrases: [
                 // Phrases principales en français
-                "Va chercher \(\.$mediaName) sur \(.applicationName)",
-                "Télécharge \(\.$mediaName) sur \(.applicationName)",
-                "Cherche \(\.$mediaName) sur \(.applicationName)",
-                "Ajoute \(\.$mediaName) sur \(.applicationName)",
-                "Demande \(\.$mediaName) sur \(.applicationName)",
+                "Va chercher un média sur \(.applicationName)",
+                "Télécharge un média sur \(.applicationName)",
+                "Cherche un média sur \(.applicationName)",
+                "Ajoute un média sur \(.applicationName)",
+                "Demande un média sur \(.applicationName)",
 
                 // Phrases avec type de média
-                "Télécharge le film \(\.$mediaName) sur \(.applicationName)",
-                "Télécharge la série \(\.$mediaName) sur \(.applicationName)",
-                "Cherche le film \(\.$mediaName) sur \(.applicationName)",
-                "Cherche la série \(\.$mediaName) sur \(.applicationName)",
+                "Télécharge un film sur \(.applicationName)",
+                "Télécharge une série sur \(.applicationName)",
+                "Cherche un film sur \(.applicationName)",
+                "Cherche une série sur \(.applicationName)",
 
                 // Phrases plus naturelles
-                "Je veux regarder \(\.$mediaName) avec \(.applicationName)",
-                "Trouve \(\.$mediaName) sur \(.applicationName)",
-                "Mets \(\.$mediaName) en téléchargement sur \(.applicationName)"
+                "Je veux regarder quelque chose avec \(.applicationName)",
+                "Trouve un média sur \(.applicationName)",
+                "Mets un média en téléchargement sur \(.applicationName)"
             ],
             shortTitle: "Télécharger un média",
             systemImageName: "arrow.down.circle.fill"

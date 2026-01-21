@@ -11,7 +11,7 @@ struct KikiFlarrApp: App {
 
         // Enregistrer les raccourcis Siri
         if #available(iOS 16.0, *) {
-            AppShortcuts.updateAppShortcutParameters()
+            updateSiriShortcuts()
         }
     }
 

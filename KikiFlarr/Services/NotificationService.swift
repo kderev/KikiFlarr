@@ -46,10 +46,13 @@ class NotificationService: ObservableObject {
 
     // MARK: - Download Notifications
 
-    func notifyDownloadCompleted(torrentName: String, torrentHash: String, instanceName: String) async {
+    func notifyDownloadCompleted(torrentName: String, torrentHash: String, instanceId: String, instanceName: String) async {
         guard downloadNotificationsEnabled else { return }
         guard isAuthorized else { return }
-        guard !hasAlreadyNotified(torrentHash: torrentHash) else { return }
+
+        // Utiliser une clé composite instance+hash pour éviter la suppression cross-instance
+        let notificationKey = "\(instanceId)-\(torrentHash)"
+        guard !hasAlreadyNotified(key: notificationKey) else { return }
 
         let content = UNMutableNotificationContent()
         content.title = "Téléchargement terminé"
@@ -60,18 +63,19 @@ class NotificationService: ObservableObject {
         content.userInfo = [
             "torrentHash": torrentHash,
             "torrentName": torrentName,
+            "instanceId": instanceId,
             "instanceName": instanceName
         ]
 
         let request = UNNotificationRequest(
-            identifier: "download-\(torrentHash)",
+            identifier: "download-\(instanceId)-\(torrentHash)",
             content: content,
             trigger: nil // Notification immédiate
         )
 
         do {
             try await notificationCenter.add(request)
-            markAsNotified(torrentHash: torrentHash)
+            markAsNotified(key: notificationKey)
         } catch {
             print("Erreur lors de l'envoi de la notification: \(error.localizedDescription)")
         }
@@ -79,14 +83,14 @@ class NotificationService: ObservableObject {
 
     // MARK: - Tracking des torrents déjà notifiés
 
-    private func hasAlreadyNotified(torrentHash: String) -> Bool {
+    private func hasAlreadyNotified(key: String) -> Bool {
         let notifiedTorrents = getNotifiedTorrents()
-        return notifiedTorrents.contains(torrentHash)
+        return notifiedTorrents.contains(key)
     }
 
-    private func markAsNotified(torrentHash: String) {
+    private func markAsNotified(key: String) {
         var notifiedTorrents = getNotifiedTorrents()
-        notifiedTorrents.insert(torrentHash)
+        notifiedTorrents.insert(key)
 
         // Limiter à 500 entrées pour éviter une croissance infinie
         if notifiedTorrents.count > 500 {

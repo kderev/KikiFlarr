@@ -206,6 +206,7 @@ class DownloadsViewModel: ObservableObject {
                 await NotificationService.shared.notifyDownloadCompleted(
                     torrentName: torrent.name,
                     torrentHash: torrent.hash,
+                    instanceId: torrentWithInstance.instance.id.uuidString,
                     instanceName: torrentWithInstance.instance.name
                 )
             }

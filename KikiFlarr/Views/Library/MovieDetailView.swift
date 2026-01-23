@@ -708,6 +708,15 @@ struct InteractiveSearchView: View {
 
 // MARK: - Mark As Watched Sheet
 
+struct WatchedDatePickerCard: View {
+    @Binding var watchedDate: Date
+
+    var body: some View {
+        DatePicker("Date", selection: $watchedDate, displayedComponents: [.date])
+            .datePickerStyle(.compact)
+    }
+}
+
 struct MarkAsWatchedSheet: View {
     @EnvironmentObject var watchedViewModel: WatchedViewModel
     @Environment(\.dismiss) private var dismiss

@@ -49,7 +49,6 @@
 		B8C6D2E9E6E4B9E9C1A7F6C0 /* SonarrCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8C6D2E8F1A3E52EFA5B3B4C /* SonarrCalendarView.swift */; };
 		B96FDAD9156659849820537A /* InstanceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A477238107018BABAB9A784 /* InstanceManager.swift */; };
 		BB3697594C5BC137F4440C76 /* AsyncImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A3EA0A8064DAB7653FF8586 /* AsyncImageView.swift */; };
-		BBE2D2C1A2F1D6B3C7E4A012 /* WatchedDatePickerCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBE2D2C0A12B44F7C3E8D9AB /* WatchedDatePickerCard.swift */; };
 		BCD898B06BFAC7B71E31B6C2 /* DownloadsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C087736725E679108CDCEEC2 /* DownloadsView.swift */; };
 		CA4343AF0508F029F03C0F58 /* DiscoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B8E252415947B12AA4A4949 /* DiscoverView.swift */; };
 		CB1618D782D0A3BB3789CB05 /* NetworkError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 107445F17B02F9CBD02CB2DE /* NetworkError.swift */; };
@@ -110,7 +109,6 @@
 		BA13A6425158382523B6C22B /* RadarrModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadarrModels.swift; sourceTree = "<group>"; };
 		BBBF956C2DBF6A5B35BD2684 /* TMDBService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TMDBService.swift; sourceTree = "<group>"; };
 		B8C6D2E8F1A3E52EFA5B3B4C /* SonarrCalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SonarrCalendarView.swift; sourceTree = "<group>"; };
-		BBE2D2C0A12B44F7C3E8D9AB /* WatchedDatePickerCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchedDatePickerCard.swift; sourceTree = "<group>"; };
 		C087736725E679108CDCEEC2 /* DownloadsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadsView.swift; sourceTree = "<group>"; };
 		C52E696971197ADC5FA592C1 /* InstanceRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstanceRow.swift; sourceTree = "<group>"; };
 		D67AD7A820F9D70B22D6554C /* QBittorrentModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QBittorrentModels.swift; sourceTree = "<group>"; };
@@ -254,7 +252,6 @@
 				C52E696971197ADC5FA592C1 /* InstanceRow.swift */,
 				EA7327AFDF96F73332189A41 /* SearchResultCard.swift */,
 				03A4C8031B7A744E5199EE48 /* TorrentCard.swift */,
-				BBE2D2C0A12B44F7C3E8D9AB /* WatchedDatePickerCard.swift */,
 				CAC3D34B9E864143805E36C1 /* LoadableView.swift */,
 			);
 			path = Components;
@@ -417,7 +414,6 @@
 			files = (
 				06A027FAB862026445608AE4 /* APIClient.swift in Sources */,
 				BB3697594C5BC137F4440C76 /* AsyncImageView.swift in Sources */,
-				BBE2D2C1A2F1D6B3C7E4A012 /* WatchedDatePickerCard.swift in Sources */,
 				56D02F6CC320C867E0089D2D /* CollectionView.swift in Sources */,
 				D0BF6C9738C067BF6BBF936D /* Config.example.swift in Sources */,
 				77E30C3C39ACE006D178FE24 /* ContentView.swift in Sources */,

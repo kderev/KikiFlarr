@@ -552,10 +552,8 @@ struct MovieRatingSheet: View {
                     }
                 }
                 
-                Section {
-                    WatchedDatePickerCard(selection: $watchedDate)
-                        .listRowInsets(EdgeInsets())
-                        .listRowBackground(Color.clear)
+                Section("Date de visionnage") {
+                    DatePicker("Date", selection: $watchedDate, displayedComponents: [.date])
                 }
                 
                 Section("Votre note (optionnel)") {
@@ -1155,10 +1153,8 @@ struct EpisodeRatingSheet: View {
                     }
                 }
                 
-                Section {
-                    WatchedDatePickerCard(selection: $watchedDate)
-                        .listRowInsets(EdgeInsets())
-                        .listRowBackground(Color.clear)
+                Section("Date de visionnage") {
+                    DatePicker("Date", selection: $watchedDate, displayedComponents: [.date])
                 }
                 
                 Section("Votre note (optionnel)") {

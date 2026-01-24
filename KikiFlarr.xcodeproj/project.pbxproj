@@ -61,7 +61,6 @@
 		FABF7EC326D051291C4518D0 /* Formatters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 102C13B05D1ADA17B72A7010 /* Formatters.swift */; };
 		673CEBC5DA1C44C4B9CFD45A /* LoadableState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04A4F9611D1048FFBBC32398 /* LoadableState.swift */; };
 		A5E538ADBF714D7889FBB497 /* LoadableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAC3D34B9E864143805E36C1 /* LoadableView.swift */; };
-		9C6E2D3F1A2B4C5D6E7F8090 /* WatchedDatePickerCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4B2C1D0F9A8B7C6D5E4F30 /* WatchedDatePickerCard.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -108,7 +107,6 @@
 		BBBF956C2DBF6A5B35BD2684 /* TMDBService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TMDBService.swift; sourceTree = "<group>"; };
 		C087736725E679108CDCEEC2 /* DownloadsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadsView.swift; sourceTree = "<group>"; };
 		C52E696971197ADC5FA592C1 /* InstanceRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstanceRow.swift; sourceTree = "<group>"; };
-		8E4B2C1D0F9A8B7C6D5E4F30 /* WatchedDatePickerCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchedDatePickerCard.swift; sourceTree = "<group>"; };
 		D67AD7A820F9D70B22D6554C /* QBittorrentModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QBittorrentModels.swift; sourceTree = "<group>"; };
 		D6F18CE3EA0A36F8C8D14D10 /* OverseerrModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverseerrModels.swift; sourceTree = "<group>"; };
 		D75CBCB3898A295ED940CB8F /* TMDBModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TMDBModels.swift; sourceTree = "<group>"; };
@@ -241,8 +239,7 @@
 				C52E696971197ADC5FA592C1 /* InstanceRow.swift */,
 				EA7327AFDF96F73332189A41 /* SearchResultCard.swift */,
 				03A4C8031B7A744E5199EE48 /* TorrentCard.swift */,
-				CAC3D34B9E864143805E36C1 /* LoadableView.swift */,
-				8E4B2C1D0F9A8B7C6D5E4F30 /* WatchedDatePickerCard.swift */,
+							CAC3D34B9E864143805E36C1 /* LoadableView.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -448,7 +445,6 @@
 				F16B4EA8EA1608E14250AB61 /* WatchedModels.swift in Sources */,
 				2CC51D860C57EEBECF230A07 /* WatchedStorageService.swift in Sources */,
 				9F8533B38C21D8EAF3D2770F /* WatchedViewModel.swift in Sources */,
-				9C6E2D3F1A2B4C5D6E7F8090 /* WatchedDatePickerCard.swift in Sources */,
 				673CEBC5DA1C44C4B9CFD45A /* LoadableState.swift in Sources */,
 				A5E538ADBF714D7889FBB497 /* LoadableView.swift in Sources */,
 				S1R1INT3NT00001BF /* SearchAndDownloadIntent.swift in Sources */,

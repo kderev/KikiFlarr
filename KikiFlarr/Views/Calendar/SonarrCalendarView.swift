@@ -199,7 +199,7 @@ private struct SonarrCalendarRow: View {
             HStack(alignment: .top, spacing: 14) {
                 dateBadge
 
-                PosterImageView(url: item.episode.series?.posterURL, width: 72)
+                PosterImageView(url: item.episode.series?.posterURL, width: 68)
                     .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                     .overlay(
                         RoundedRectangle(cornerRadius: 14, style: .continuous)
@@ -257,7 +257,7 @@ private struct SonarrCalendarRow: View {
                 .textCase(.uppercase)
                 .foregroundStyle(.secondary)
         }
-        .frame(width: 58, height: 72)
+        .frame(width: 52, height: 68)
         .background(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .fill(Color(.secondarySystemBackground))
@@ -335,20 +335,17 @@ private struct SonarrCalendarRow: View {
 
     @ViewBuilder
     private var metadataChips: some View {
-        HStack(spacing: 8) {
-            if let qualityLabel {
-                chip(text: qualityLabel, systemImage: "sparkles.tv")
-            }
-
-            if let profileName {
-                chip(text: profileName, systemImage: "bolt.badge.checkmark")
-            }
+        if let qualityLabel {
+            chip(text: qualityLabel, systemImage: "sparkles.tv")
         }
     }
 
     private func chip(text: String, systemImage: String) -> some View {
         Label(text, systemImage: systemImage)
             .font(.caption.weight(.semibold))
+            .lineLimit(1)
+            .minimumScaleFactor(0.75)
+            .allowsTightening(true)
             .padding(.horizontal, 10)
             .padding(.vertical, 6)
             .background(

@@ -765,10 +765,8 @@ struct MarkAsWatchedSheet: View {
                 }
                 
                 // Date de visionnage
-                Section {
-                    WatchedDatePickerCard(selection: $watchedDate)
-                        .listRowInsets(EdgeInsets())
-                        .listRowBackground(Color.clear)
+                Section("Date de visionnage") {
+                    DatePicker("Date", selection: $watchedDate, displayedComponents: [.date])
                 }
                 
                 // Note

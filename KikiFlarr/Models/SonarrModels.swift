@@ -15,7 +15,7 @@ struct SonarrSeries: Codable, Identifiable {
     let seasons: [SonarrSeason]?
     let year: Int
     let path: String?
-    let qualityProfileId: Int?
+    var qualityProfileId: Int?
     let languageProfileId: Int?
     let seasonFolder: Bool?
     let monitored: Bool?
@@ -224,6 +224,27 @@ struct SonarrQueueRecord: Codable, Identifiable {
         guard let size = size, let sizeleft = sizeleft, size > 0 else { return 0 }
         return ((size - sizeleft) / size) * 100
     }
+}
+
+struct SonarrCalendarEpisode: Codable, Identifiable {
+    let id: Int
+    let seriesId: Int?
+    let episodeFileId: Int?
+    let seasonNumber: Int?
+    let episodeNumber: Int?
+    let title: String?
+    let airDate: String?
+    let airDateUtc: String?
+    var hasFile: Bool?
+    var monitored: Bool?
+    let series: SonarrSeries?
+    let episodeFile: SonarrEpisodeFile?
+}
+
+struct SonarrEpisodeFile: Codable, Identifiable {
+    let id: Int
+    let quality: SonarrQualityWrapper?
+    let size: Int64?
 }
 
 struct SonarrStatusMessage: Codable {

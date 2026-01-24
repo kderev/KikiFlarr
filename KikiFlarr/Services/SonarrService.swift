@@ -145,6 +145,19 @@ actor SonarrService {
         ])
         return try await client.request(url: url, headers: headers)
     }
+
+    // MARK: - Calendar
+
+    func getCalendar(startDate: String, endDate: String, includeUnmonitored: Bool = true) async throws -> [SonarrCalendarEpisode] {
+        let url = try buildURL(path: "/calendar", queryItems: [
+            URLQueryItem(name: "start", value: startDate),
+            URLQueryItem(name: "end", value: endDate),
+            URLQueryItem(name: "unmonitored", value: includeUnmonitored ? "true" : "false"),
+            URLQueryItem(name: "includeSeries", value: "true"),
+            URLQueryItem(name: "includeEpisodeFile", value: "true")
+        ])
+        return try await client.request(url: url, headers: headers)
+    }
     
     // MARK: - Commands
     
@@ -160,6 +173,28 @@ actor SonarrService {
         let command = ["name": "SeasonSearch", "seriesId": seriesId, "seasonNumber": seasonNumber] as [String : Any]
         let body = try JSONSerialization.data(withJSONObject: command)
         try await client.requestVoid(url: url, method: .post, headers: headers, body: body)
+    }
+
+    // MARK: - Episodes
+
+    func updateEpisodeMonitor(episodeIds: [Int], monitored: Bool) async throws {
+        let url = try buildURL(path: "/episode/monitor")
+        let body: [String: Any] = [
+            "episodeIds": episodeIds,
+            "monitored": monitored
+        ]
+        let jsonData = try JSONSerialization.data(withJSONObject: body)
+        try await client.requestVoid(url: url, method: .put, headers: headers, body: jsonData)
+    }
+
+    // MARK: - Series Updates
+
+    func updateSeriesQualityProfile(seriesId: Int, qualityProfileId: Int) async throws {
+        var series = try await getSeries(id: seriesId)
+        series.qualityProfileId = qualityProfileId
+        let url = try buildURL(path: "/series")
+        let body = try client.encode(series)
+        try await client.requestVoid(url: url, method: .put, headers: headers, body: body)
     }
     
     // MARK: - Releases (Interactive Search)

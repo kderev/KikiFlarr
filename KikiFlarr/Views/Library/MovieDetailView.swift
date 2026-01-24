@@ -767,6 +767,7 @@ struct MarkAsWatchedSheet: View {
                 // Date de visionnage
                 Section("Date de visionnage") {
                     DatePicker("Date", selection: $watchedDate, displayedComponents: [.date])
+                        .datePickerStyle(.compact)
                 }
                 
                 // Note

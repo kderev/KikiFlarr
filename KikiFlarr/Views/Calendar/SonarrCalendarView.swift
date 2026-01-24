@@ -183,7 +183,15 @@ private struct SonarrCalendarRow: View {
     let onSelectProfile: (SonarrQualityProfile) -> Void
 
     private var episodeDate: Date? {
-        item.episode.airDateUtc ?? item.episode.airDate
+        let dateString = item.episode.airDateUtc ?? item.episode.airDate
+        guard let dateString else { return nil }
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        if let date = formatter.date(from: dateString) {
+            return date
+        }
+        formatter.formatOptions = [.withInternetDateTime]
+        return formatter.date(from: dateString)
     }
 
     var body: some View {

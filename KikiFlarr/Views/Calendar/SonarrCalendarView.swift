@@ -57,12 +57,12 @@ struct SonarrCalendarView: View {
 
     private func calendarList(items: [SonarrCalendarViewModel.CalendarEpisodeItem]) -> some View {
         ScrollView {
-            LazyVStack(alignment: .leading, spacing: 20) {
+            LazyVStack(alignment: .leading, spacing: 24) {
                 ForEach(groupedItems(from: items), id: \.title) { section in
-                    VStack(alignment: .leading, spacing: 14) {
+                    VStack(alignment: .leading, spacing: 12) {
                         calendarSectionHeader(section.title)
 
-                        VStack(spacing: 14) {
+                        VStack(spacing: 12) {
                             ForEach(section.items) { item in
                                 SonarrCalendarRow(
                                     item: item,
@@ -85,55 +85,35 @@ struct SonarrCalendarView: View {
                             }
                         }
                     }
-                    .padding(18)
-                    .background(sectionBackground)
-                    .overlay(sectionBorder)
                 }
             }
-            .padding(.horizontal, 18)
-            .padding(.vertical, 20)
+            .padding(.horizontal, 20)
+            .padding(.top, 20)
+            .padding(.bottom, 32)
         }
-        .background(Color(.systemGroupedBackground))
+        .background(calendarBackground.ignoresSafeArea())
     }
 
     private func calendarSectionHeader(_ title: String) -> some View {
-        HStack(spacing: 10) {
-            Image(systemName: "calendar")
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(.tint)
-
+        HStack(spacing: 8) {
             Text(title)
-                .font(.headline)
+                .font(.title3.weight(.semibold))
                 .foregroundStyle(.primary)
 
             Spacer(minLength: 0)
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
-        .background(
-            Capsule(style: .continuous)
-                .fill(Color(.secondarySystemBackground))
+        .padding(.horizontal, 4)
+    }
+
+    private var calendarBackground: some View {
+        LinearGradient(
+            colors: [
+                Color(.systemGroupedBackground),
+                Color(.secondarySystemGroupedBackground)
+            ],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
         )
-    }
-
-    private var sectionBackground: some View {
-        RoundedRectangle(cornerRadius: 20, style: .continuous)
-            .fill(
-                LinearGradient(
-                    colors: [
-                        Color(.systemBackground),
-                        Color(.systemBackground).opacity(0.96)
-                    ],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-            )
-            .shadow(color: .black.opacity(0.04), radius: 10, x: 0, y: 6)
-    }
-
-    private var sectionBorder: some View {
-        RoundedRectangle(cornerRadius: 20, style: .continuous)
-            .strokeBorder(Color.primary.opacity(0.05), lineWidth: 1)
     }
 
     private func groupedItems(from items: [SonarrCalendarViewModel.CalendarEpisodeItem]) -> [(title: String, items: [SonarrCalendarViewModel.CalendarEpisodeItem])] {
@@ -195,50 +175,49 @@ private struct SonarrCalendarRow: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: 14) {
             HStack(alignment: .top, spacing: 14) {
-                dateBadge
-
-                PosterImageView(url: item.episode.series?.posterURL, width: 68)
-                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                PosterImageView(url: item.episode.series?.posterURL, width: 70)
+                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                     .overlay(
-                        RoundedRectangle(cornerRadius: 14, style: .continuous)
-                            .strokeBorder(Color.primary.opacity(0.06), lineWidth: 1)
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .strokeBorder(Color.white.opacity(0.06), lineWidth: 1)
                     )
 
                 VStack(alignment: .leading, spacing: 8) {
+                    HStack(spacing: 8) {
+                        dateBadge
+                        if let timeLabel {
+                            Label(timeLabel, systemImage: "clock")
+                                .font(.caption.weight(.medium))
+                                .foregroundStyle(.secondary)
+                        }
+                        Spacer(minLength: 0)
+                    }
+
                     Text(item.episode.series?.title ?? "Série inconnue")
                         .font(.headline)
                         .foregroundStyle(.primary)
+                        .lineLimit(1)
 
                     Text(episodeSubtitle)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                         .lineLimit(2)
 
-                    if let timeLabel {
-                        Label(timeLabel, systemImage: "clock")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-
                     metadataChips
                 }
+            }
 
+            HStack(spacing: 12) {
+                monitoredToggle
                 Spacer(minLength: 0)
+                profileMenu
             }
 
-            VStack(spacing: 12) {
-                HStack(spacing: 12) {
-                    monitoredToggle
-                    Spacer(minLength: 0)
-                    profileMenu
-                }
-
-                instancePill
-            }
+            instancePill
         }
-        .padding(18)
+        .padding(16)
         .background(cardBackground)
         .overlay(cardBorder)
         .opacity(isUpdating ? 0.7 : 1)
@@ -246,25 +225,24 @@ private struct SonarrCalendarRow: View {
     }
 
     private var dateBadge: some View {
-        VStack(spacing: 2) {
+        HStack(spacing: 6) {
             Text(dayNumberText)
-                .font(.title3.weight(.semibold))
+                .font(.subheadline.weight(.semibold))
                 .monospacedDigit()
-                .foregroundStyle(.primary)
-
             Text(monthText)
                 .font(.caption.weight(.semibold))
                 .textCase(.uppercase)
-                .foregroundStyle(.secondary)
         }
-        .frame(width: 52, height: 68)
+        .foregroundStyle(.primary)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
         .background(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(Color(.secondarySystemBackground))
+            Capsule(style: .continuous)
+                .fill(Color.accentColor.opacity(0.16))
         )
         .overlay(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .strokeBorder(Color.primary.opacity(0.05), lineWidth: 1)
+            Capsule(style: .continuous)
+                .strokeBorder(Color.accentColor.opacity(0.28), lineWidth: 1)
         )
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Diffusion le \(fullDateText)")
@@ -344,26 +322,39 @@ private struct SonarrCalendarRow: View {
         Label(text, systemImage: systemImage)
             .font(.caption.weight(.semibold))
             .lineLimit(1)
-            .minimumScaleFactor(0.75)
+            .minimumScaleFactor(0.8)
             .allowsTightening(true)
             .padding(.horizontal, 10)
             .padding(.vertical, 6)
             .background(
                 Capsule(style: .continuous)
-                    .fill(Color(.secondarySystemBackground))
+                    .fill(Color.accentColor.opacity(0.14))
+            )
+            .overlay(
+                Capsule(style: .continuous)
+                    .strokeBorder(Color.accentColor.opacity(0.22), lineWidth: 1)
             )
             .foregroundStyle(.primary)
     }
 
     private var cardBackground: some View {
         RoundedRectangle(cornerRadius: 22, style: .continuous)
-            .fill(Color(.systemBackground))
-            .shadow(color: .black.opacity(0.03), radius: 8, x: 0, y: 6)
+            .fill(
+                LinearGradient(
+                    colors: [
+                        Color(.secondarySystemBackground),
+                        Color(.secondarySystemBackground).opacity(0.92)
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+            .shadow(color: .black.opacity(0.18), radius: 14, x: 0, y: 10)
     }
 
     private var cardBorder: some View {
         RoundedRectangle(cornerRadius: 22, style: .continuous)
-            .strokeBorder(Color.primary.opacity(0.05), lineWidth: 1)
+            .strokeBorder(Color.white.opacity(0.06), lineWidth: 1)
     }
 
     private var dayNumberText: String {

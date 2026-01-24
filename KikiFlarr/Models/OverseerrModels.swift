@@ -154,7 +154,7 @@ struct OverseerrRequest: Codable, Identifiable {
     let requestedBy: OverseerrUser?
     let modifiedBy: OverseerrUser?
     let seasons: [OverseerrRequestSeason]?
-    
+
     var statusDescription: String {
         switch status {
         case 1: return "En attente d'approbation"
@@ -162,6 +162,45 @@ struct OverseerrRequest: Codable, Identifiable {
         case 3: return "Refusé"
         default: return "Inconnu"
         }
+    }
+
+    var requestStatus: RequestStatus {
+        switch status {
+        case 1: return .pending
+        case 2: return .approved
+        case 3: return .declined
+        default: return .unknown
+        }
+    }
+
+    var formattedCreatedAt: String? {
+        guard let createdAt = createdAt else { return nil }
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        if let date = formatter.date(from: createdAt) {
+            let displayFormatter = DateFormatter()
+            displayFormatter.dateStyle = .medium
+            displayFormatter.timeStyle = .short
+            displayFormatter.locale = Locale(identifier: "fr_FR")
+            return displayFormatter.string(from: date)
+        }
+        // Try without fractional seconds
+        formatter.formatOptions = [.withInternetDateTime]
+        if let date = formatter.date(from: createdAt) {
+            let displayFormatter = DateFormatter()
+            displayFormatter.dateStyle = .medium
+            displayFormatter.timeStyle = .short
+            displayFormatter.locale = Locale(identifier: "fr_FR")
+            return displayFormatter.string(from: date)
+        }
+        return nil
+    }
+
+    enum RequestStatus {
+        case pending
+        case approved
+        case declined
+        case unknown
     }
 }
 
@@ -631,17 +670,17 @@ struct RequestWithMedia: Identifiable {
     let posterPath: String?
     let year: String
     let overview: String?
-    
+
     var id: Int { request.id }
-    
+
     var fullPosterURL: URL? {
         guard let posterPath = posterPath else { return nil }
         return URL(string: "https://image.tmdb.org/t/p/w500\(posterPath)")
     }
-    
+
     var downloadStatus: DownloadStatus {
         guard let media = request.media else { return .unknown }
-        
+
         switch media.status {
         case 5: return .available
         case 4: return .partiallyAvailable
@@ -650,7 +689,7 @@ struct RequestWithMedia: Identifiable {
         default: return .unknown
         }
     }
-    
+
     var downloadStatusDescription: String {
         switch downloadStatus {
         case .available: return "Téléchargé"
@@ -660,7 +699,7 @@ struct RequestWithMedia: Identifiable {
         case .unknown: return "Inconnu"
         }
     }
-    
+
     var downloadStatusColor: String {
         switch downloadStatus {
         case .available: return "green"
@@ -670,12 +709,42 @@ struct RequestWithMedia: Identifiable {
         case .unknown: return "gray"
         }
     }
-    
+
     enum DownloadStatus {
         case available
         case partiallyAvailable
         case downloading
         case pending
         case unknown
+    }
+
+    // Request approval status
+    var requestStatusDescription: String {
+        switch request.requestStatus {
+        case .pending: return "En attente"
+        case .approved: return "Approuvé"
+        case .declined: return "Refusé"
+        case .unknown: return "Inconnu"
+        }
+    }
+
+    var isPending: Bool {
+        request.requestStatus == .pending
+    }
+
+    var isApproved: Bool {
+        request.requestStatus == .approved
+    }
+
+    var isDeclined: Bool {
+        request.requestStatus == .declined
+    }
+
+    var canBeApproved: Bool {
+        request.requestStatus == .pending
+    }
+
+    var canBeDeclined: Bool {
+        request.requestStatus == .pending
     }
 }

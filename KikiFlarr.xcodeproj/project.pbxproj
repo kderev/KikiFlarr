@@ -63,6 +63,8 @@
 		FABF7EC326D051291C4518D0 /* Formatters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 102C13B05D1ADA17B72A7010 /* Formatters.swift */; };
 		673CEBC5DA1C44C4B9CFD45A /* LoadableState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04A4F9611D1048FFBBC32398 /* LoadableState.swift */; };
 		A5E538ADBF714D7889FBB497 /* LoadableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAC3D34B9E864143805E36C1 /* LoadableView.swift */; };
+		R3QU35T5V13WBF01 /* RequestsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = R3QU35T5V13WFR01 /* RequestsView.swift */; };
+		R3QU35T5VMBF01 /* RequestsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = R3QU35T5VMFR01 /* RequestsViewModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -124,6 +126,8 @@
 		F308A5E51439751F9A2EE1CA /* InstanceGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstanceGroup.swift; sourceTree = "<group>"; };
 		04A4F9611D1048FFBBC32398 /* LoadableState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadableState.swift; sourceTree = "<group>"; };
 		CAC3D34B9E864143805E36C1 /* LoadableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadableView.swift; sourceTree = "<group>"; };
+		R3QU35T5V13WFR01 /* RequestsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestsView.swift; sourceTree = "<group>"; };
+		R3QU35T5VMFR01 /* RequestsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestsViewModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -222,10 +226,19 @@
 				85B7310D2D75FBC99F2D6099 /* Discover */,
 				613C07C71C4E807F0C3701E3 /* Downloads */,
 				1F797EF1AD3CF092BE5A2E29 /* Library */,
+				R3QU35T5GR0UP01 /* Requests */,
 				DFD8BBAA3B439BDA95307CE6 /* Search */,
 				F4BE117816A935826CF28C27 /* Settings */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		R3QU35T5GR0UP01 /* Requests */ = {
+			isa = PBXGroup;
+			children = (
+				R3QU35T5V13WFR01 /* RequestsView.swift */,
+			);
+			path = Requests;
 			sourceTree = "<group>";
 		};
 		4E7C6A8B2E3E4B8D9E1C2F34 /* Calendar */ = {
@@ -325,6 +338,7 @@
 				5CDC9A8B7CAEB3FEA4F04A6E /* DiscoverViewModel.swift */,
 				6EC2C6EE792F3BD785D0C80F /* DownloadsViewModel.swift */,
 				9EB42C51D5C1F985C3093506 /* LibraryViewModel.swift */,
+				R3QU35T5VMFR01 /* RequestsViewModel.swift */,
 				38B6E3F32D8B4C7AE8E0C8AF /* SonarrCalendarViewModel.swift */,
 				E93D0395257CE11A92278DFA /* SearchViewModel.swift */,
 				D9CAFCA1B53CDC6108B3C23B /* SettingsViewModel.swift */,
@@ -467,6 +481,8 @@
 				S1R1INT3NT00002BF /* AppShortcuts.swift in Sources */,
 				S1R1INT3NT00003BF /* SiriResultView.swift in Sources */,
 				S1R1S3TT1NGS0001BF /* SiriSettingsView.swift in Sources */,
+				R3QU35T5V13WBF01 /* RequestsView.swift in Sources */,
+				R3QU35T5VMBF01 /* RequestsViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -237,6 +237,81 @@ actor OverseerrService {
         let url = try buildURL(path: "/request/\(requestId)")
         try await client.requestVoid(url: url, method: .delete, headers: headers)
     }
+
+    func approveRequest(requestId: Int) async throws -> OverseerrRequest {
+        let url = try buildURL(path: "/request/\(requestId)/approve")
+        return try await client.request(url: url, method: .post, headers: headers)
+    }
+
+    func declineRequest(requestId: Int) async throws -> OverseerrRequest {
+        let url = try buildURL(path: "/request/\(requestId)/decline")
+        return try await client.request(url: url, method: .post, headers: headers)
+    }
+
+    func retryRequest(requestId: Int) async throws -> OverseerrRequest {
+        let url = try buildURL(path: "/request/\(requestId)/retry")
+        return try await client.request(url: url, method: .post, headers: headers)
+    }
+
+    func getRequestsWithMediaPaginated(take: Int = 20, skip: Int = 0, filter: RequestFilter = .all) async throws -> (requests: [RequestWithMedia], pageInfo: PageInfo) {
+        let requestsResponse = try await getRequests(take: take, skip: skip, filter: filter)
+
+        let enrichedRequests = await withTaskGroup(of: RequestWithMedia?.self) { group in
+            for request in requestsResponse.results {
+                group.addTask {
+                    guard let media = request.media, let tmdbId = media.tmdbId else {
+                        return RequestWithMedia(
+                            request: request,
+                            title: request.type == "movie" ? "Film" : "Série",
+                            posterPath: nil,
+                            year: "",
+                            overview: nil
+                        )
+                    }
+
+                    do {
+                        if request.type == "movie" {
+                            let details = try await self.getMovieDetails(tmdbId: tmdbId)
+                            return RequestWithMedia(
+                                request: request,
+                                title: details.title ?? "Film inconnu",
+                                posterPath: details.posterPath,
+                                year: details.displayYear,
+                                overview: details.overview
+                            )
+                        } else {
+                            let details = try await self.getTVDetails(tmdbId: tmdbId)
+                            return RequestWithMedia(
+                                request: request,
+                                title: details.name ?? "Série inconnue",
+                                posterPath: details.posterPath,
+                                year: details.displayYear,
+                                overview: details.overview
+                            )
+                        }
+                    } catch {
+                        return RequestWithMedia(
+                            request: request,
+                            title: request.type == "movie" ? "Film" : "Série",
+                            posterPath: nil,
+                            year: "",
+                            overview: nil
+                        )
+                    }
+                }
+            }
+
+            var results: [RequestWithMedia] = []
+            for await result in group {
+                if let result = result {
+                    results.append(result)
+                }
+            }
+            return results
+        }
+
+        return (enrichedRequests, requestsResponse.pageInfo)
+    }
     
     // MARK: - User
     

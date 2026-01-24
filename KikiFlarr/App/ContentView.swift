@@ -7,6 +7,7 @@ struct ContentView: View {
 
     enum Tab: String {
         case discover
+        case requests
         case library
         case calendar
         case collection
@@ -25,6 +26,12 @@ struct ContentView: View {
                             Label("Découvrir", systemImage: "sparkles")
                         }
                         .tag(Tab.discover)
+
+                    RequestsView()
+                        .tabItem {
+                            Label("Requêtes", systemImage: "text.badge.plus")
+                        }
+                        .tag(Tab.requests)
 
                     LibraryView()
                         .tabItem {

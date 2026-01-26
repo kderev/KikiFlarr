@@ -1036,8 +1036,9 @@ struct StatsView: View {
                 selectedWrappedMonth = firstMonth
             }
         }
-        .onChange(of: availableWrappedMonths) { months in
-            if let firstMonth = months.first, !months.contains(selectedWrappedMonth) {
+        .onChange(of: availableWrappedMonths) {
+            if let firstMonth = availableWrappedMonths.first,
+               !availableWrappedMonths.contains(selectedWrappedMonth) {
                 selectedWrappedMonth = firstMonth
             }
         }

@@ -781,15 +781,190 @@ struct StatBubble: View {
     }
 }
 
+// MARK: - Wrapped mensuel
+
+struct MonthlyWrappedCard: View {
+    let stats: MonthlyWrappedStats
+    let monthLabel: String
+
+    private let columns = [
+        GridItem(.flexible(), spacing: 12),
+        GridItem(.flexible(), spacing: 12)
+    ]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Wrapped du mois")
+                        .font(.headline)
+                    Text(monthLabel)
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+                Spacer()
+                Image(systemName: "sparkles")
+                    .foregroundColor(.accentColor)
+            }
+
+            LazyVGrid(columns: columns, spacing: 12) {
+                WrappedStatItem(title: "Films", value: "\(stats.moviesCount)", icon: "film.fill", color: .blue)
+                WrappedStatItem(title: "Séries", value: "\(stats.seriesCount)", icon: "tv.fill", color: .teal)
+                WrappedStatItem(title: "Épisodes", value: "\(stats.episodesCount)", icon: "play.rectangle.fill", color: .indigo)
+                WrappedStatItem(title: "Temps total", value: stats.formattedRuntime, icon: "clock.fill", color: .purple)
+            }
+
+            if !stats.topGenres.isEmpty {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Top genres")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    FlowLayout(spacing: 8) {
+                        ForEach(stats.topGenres, id: \.self) { genre in
+                            Text(genre)
+                                .font(.caption)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 6)
+                                .background(Color.secondary.opacity(0.12))
+                                .clipShape(Capsule())
+                        }
+                    }
+                }
+            }
+        }
+        .padding()
+        .background(
+            LinearGradient(
+                colors: [Color(.systemBackground), Color(.secondarySystemBackground)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(Color.primary.opacity(0.08), lineWidth: 1)
+        )
+    }
+}
+
+struct WrappedStatItem: View {
+    let title: String
+    let value: String
+    let icon: String
+    let color: Color
+
+    var body: some View {
+        HStack(spacing: 10) {
+            Image(systemName: icon)
+                .foregroundColor(color)
+                .frame(width: 24)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(value)
+                    .font(.headline)
+                Text(title)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+
+            Spacer(minLength: 0)
+        }
+        .padding(10)
+        .background(color.opacity(0.1))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+}
+
+struct FlowLayout: Layout {
+    var spacing: CGFloat = 8
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let maxWidth = proposal.width ?? 0
+        var currentRowWidth: CGFloat = 0
+        var currentRowHeight: CGFloat = 0
+        var totalHeight: CGFloat = 0
+
+        for subview in subviews {
+            let size = subview.sizeThatFits(.unspecified)
+            if currentRowWidth + size.width > maxWidth, currentRowWidth > 0 {
+                totalHeight += currentRowHeight + spacing
+                currentRowWidth = 0
+                currentRowHeight = 0
+            }
+
+            currentRowWidth += size.width + (currentRowWidth == 0 ? 0 : spacing)
+            currentRowHeight = max(currentRowHeight, size.height)
+        }
+
+        totalHeight += currentRowHeight
+        return CGSize(width: maxWidth, height: totalHeight)
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        var x = bounds.minX
+        var y = bounds.minY
+        var rowHeight: CGFloat = 0
+
+        for subview in subviews {
+            let size = subview.sizeThatFits(.unspecified)
+            if x + size.width > bounds.maxX, x > bounds.minX {
+                x = bounds.minX
+                y += rowHeight + spacing
+                rowHeight = 0
+            }
+
+            subview.place(at: CGPoint(x: x, y: y), proposal: ProposedViewSize(size))
+            x += size.width + spacing
+            rowHeight = max(rowHeight, size.height)
+        }
+    }
+}
+
 // MARK: - Vue des statistiques
 
 struct StatsView: View {
     @EnvironmentObject var watchedViewModel: WatchedViewModel
     @Environment(\.dismiss) private var dismiss
+    @State private var selectedWrappedMonth = Date()
+
+    private var availableWrappedMonths: [Date] {
+        watchedViewModel.availableWrappedMonths()
+    }
+
+    private var monthFormatter: DateFormatter {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "fr_FR")
+        formatter.dateFormat = "LLLL yyyy"
+        return formatter
+    }
     
     var body: some View {
         NavigationStack {
             List {
+                Section("Wrapped mensuel") {
+                    if availableWrappedMonths.isEmpty {
+                        ContentUnavailableView("Aucun mois disponible", systemImage: "calendar.badge.exclamationmark")
+                            .listRowBackground(Color.clear)
+                    } else {
+                        Picker("Mois", selection: $selectedWrappedMonth) {
+                            ForEach(availableWrappedMonths, id: \.self) { month in
+                                Text(monthFormatter.string(from: month).capitalized)
+                                    .tag(month)
+                            }
+                        }
+                        .pickerStyle(.menu)
+
+                        let stats = watchedViewModel.monthlyWrappedStats(for: selectedWrappedMonth)
+                        MonthlyWrappedCard(
+                            stats: stats,
+                            monthLabel: monthFormatter.string(from: stats.monthStart).capitalized
+                        )
+                        .listRowInsets(EdgeInsets())
+                        .listRowBackground(Color.clear)
+                    }
+                }
+
                 Section("Vue d'ensemble") {
                     StatRow(icon: "film.fill", title: "Films vus", value: "\(watchedViewModel.stats.totalMovies)", color: .blue)
                     StatRow(icon: "tv.fill", title: "Épisodes vus", value: "\(watchedViewModel.stats.totalEpisodes)", color: .teal)
@@ -854,6 +1029,17 @@ struct StatsView: View {
                         dismiss()
                     }
                 }
+            }
+        }
+        .onAppear {
+            if let firstMonth = availableWrappedMonths.first {
+                selectedWrappedMonth = firstMonth
+            }
+        }
+        .onChange(of: availableWrappedMonths) {
+            if let firstMonth = availableWrappedMonths.first,
+               !availableWrappedMonths.contains(selectedWrappedMonth) {
+                selectedWrappedMonth = firstMonth
             }
         }
     }

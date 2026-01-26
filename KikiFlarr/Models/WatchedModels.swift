@@ -1107,3 +1107,29 @@ struct WatchedStats: Codable {
         episodesThisMonth = try container.decodeIfPresent(Int.self, forKey: .episodesThisMonth) ?? 0
     }
 }
+
+// MARK: - Wrapped mensuel
+
+struct MonthlyWrappedStats: Identifiable {
+    let id: Date
+    let monthStart: Date
+    let moviesCount: Int
+    let seriesCount: Int
+    let episodesCount: Int
+    let totalRuntimeMinutes: Int
+    let topGenres: [String]
+    
+    var totalWatched: Int {
+        moviesCount + episodesCount
+    }
+    
+    var formattedRuntime: String {
+        let hours = totalRuntimeMinutes / 60
+        let days = hours / 24
+        if days > 0 {
+            return "\(days) jours, \(hours % 24)h"
+        } else {
+            return "\(hours)h \(totalRuntimeMinutes % 60)min"
+        }
+    }
+}

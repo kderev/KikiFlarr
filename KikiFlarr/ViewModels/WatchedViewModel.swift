@@ -392,6 +392,63 @@ class WatchedViewModel: ObservableObject {
         
         return watchedSeries.filter { $0.watchedDate >= startDate }.count
     }
+
+    func availableWrappedMonths() -> [Date] {
+        let calendar = Calendar.current
+        let allDates = watchedMovies.map { $0.watchedDate }
+            + watchedSeries.map { $0.watchedDate }
+            + watchedEpisodes.map { $0.watchedDate }
+
+        let monthStarts = Set(allDates.compactMap { date in
+            calendar.date(from: calendar.dateComponents([.year, .month], from: date))
+        })
+
+        return monthStarts.sorted(by: >)
+    }
+
+    func monthlyWrappedStats(for month: Date) -> MonthlyWrappedStats {
+        let calendar = Calendar.current
+        let monthStart = calendar.date(from: calendar.dateComponents([.year, .month], from: month)) ?? month
+        let monthEnd = calendar.date(byAdding: .month, value: 1, to: monthStart) ?? monthStart
+
+        let moviesInMonth = watchedMovies.filter { $0.watchedDate >= monthStart && $0.watchedDate < monthEnd }
+        let seriesInMonth = watchedSeries.filter { $0.watchedDate >= monthStart && $0.watchedDate < monthEnd }
+        let episodesInMonth = watchedEpisodes.filter { $0.watchedDate >= monthStart && $0.watchedDate < monthEnd }
+
+        var genreCounts: [String: Int] = [:]
+        for movie in moviesInMonth {
+            for genre in movie.genres {
+                genreCounts[genre, default: 0] += 1
+            }
+        }
+        for series in seriesInMonth {
+            for genre in series.genres {
+                genreCounts[genre, default: 0] += 1
+            }
+        }
+
+        let topGenres = genreCounts.sorted { lhs, rhs in
+            if lhs.value == rhs.value {
+                return lhs.key < rhs.key
+            }
+            return lhs.value > rhs.value
+        }
+        .prefix(3)
+        .map { $0.key }
+
+        let runtimeMinutes = moviesInMonth.compactMap { $0.runtime }.reduce(0, +)
+            + episodesInMonth.compactMap { $0.runtime }.reduce(0, +)
+
+        return MonthlyWrappedStats(
+            id: monthStart,
+            monthStart: monthStart,
+            moviesCount: moviesInMonth.count,
+            seriesCount: seriesInMonth.count,
+            episodesCount: episodesInMonth.count,
+            totalRuntimeMinutes: runtimeMinutes,
+            topGenres: topGenres
+        )
+    }
     
     private func episodesWatched(inLast days: Int) -> Int {
         let calendar = Calendar.current

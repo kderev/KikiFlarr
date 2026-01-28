@@ -786,6 +786,9 @@ struct StatBubble: View {
 struct MonthlyWrappedCard: View {
     let stats: MonthlyWrappedStats
     let monthLabel: String
+    var shareURL: URL?
+    var showsShareButton = false
+    var onSizeChange: ((CGSize) -> Void)?
 
     private let columns = [
         GridItem(.flexible(), spacing: 12),
@@ -803,8 +806,17 @@ struct MonthlyWrappedCard: View {
                         .foregroundColor(.secondary)
                 }
                 Spacer()
-                Image(systemName: "sparkles")
-                    .foregroundColor(.accentColor)
+                HStack(spacing: 8) {
+                    if showsShareButton, let shareURL {
+                        ShareLink(item: shareURL) {
+                            Image(systemName: "square.and.arrow.up")
+                        }
+                        .labelStyle(.iconOnly)
+                        .accessibilityLabel("Partager le wrapped")
+                    }
+                    Image(systemName: "sparkles")
+                        .foregroundColor(.accentColor)
+                }
             }
 
             LazyVGrid(columns: columns, spacing: 12) {
@@ -834,11 +846,22 @@ struct MonthlyWrappedCard: View {
         }
         .padding()
         .background(
-            LinearGradient(
-                colors: [Color(.systemBackground), Color(.secondarySystemBackground)],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
+            ZStack {
+                LinearGradient(
+                    colors: [Color(.systemBackground), Color(.secondarySystemBackground)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                GeometryReader { proxy in
+                    Color.clear
+                        .onAppear {
+                            onSizeChange?(proxy.size)
+                        }
+                        .onChange(of: proxy.size) { newSize in
+                            onSizeChange?(newSize)
+                        }
+                }
+            }
         )
         .clipShape(RoundedRectangle(cornerRadius: 16))
         .overlay(
@@ -927,6 +950,8 @@ struct StatsView: View {
     @EnvironmentObject var watchedViewModel: WatchedViewModel
     @Environment(\.dismiss) private var dismiss
     @State private var selectedWrappedMonth = Date()
+    @State private var wrappedShareURL: URL?
+    @State private var wrappedCardSize: CGSize = .zero
 
     private var availableWrappedMonths: [Date] {
         watchedViewModel.availableWrappedMonths()
@@ -954,14 +979,33 @@ struct StatsView: View {
                             }
                         }
                         .pickerStyle(.menu)
+                        .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
 
                         let stats = watchedViewModel.monthlyWrappedStats(for: selectedWrappedMonth)
                         MonthlyWrappedCard(
                             stats: stats,
-                            monthLabel: monthFormatter.string(from: stats.monthStart).capitalized
+                            monthLabel: monthFormatter.string(from: stats.monthStart).capitalized,
+                            shareURL: wrappedShareURL,
+                            showsShareButton: true,
+                            onSizeChange: { newSize in
+                                if wrappedCardSize != newSize {
+                                    wrappedCardSize = newSize
+                                }
+                            }
                         )
-                        .listRowInsets(EdgeInsets())
+                        .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                         .listRowBackground(Color.clear)
+                        .onAppear {
+                            updateWrappedShareURL(stats: stats)
+                        }
+                        .onChange(of: selectedWrappedMonth) { newMonth in
+                            let newStats = watchedViewModel.monthlyWrappedStats(for: newMonth)
+                            updateWrappedShareURL(stats: newStats)
+                        }
+                        .onChange(of: wrappedCardSize) { _ in
+                            let newStats = watchedViewModel.monthlyWrappedStats(for: selectedWrappedMonth)
+                            updateWrappedShareURL(stats: newStats)
+                        }
                     }
                 }
 
@@ -1052,6 +1096,38 @@ struct StatsView: View {
         case "purple": return .purple
         case "orange": return .orange
         default: return .gray
+        }
+    }
+
+    @MainActor
+    private func updateWrappedShareURL(stats: MonthlyWrappedStats) {
+        guard wrappedCardSize != .zero else { return }
+        let monthLabel = monthFormatter.string(from: stats.monthStart).capitalized
+        let shareView = MonthlyWrappedCard(
+            stats: stats,
+            monthLabel: monthLabel,
+            shareURL: nil,
+            showsShareButton: false,
+            onSizeChange: nil
+        )
+        .frame(width: wrappedCardSize.width, height: wrappedCardSize.height)
+
+        let renderer = ImageRenderer(content: shareView)
+        renderer.scale = UIScreen.main.scale
+        renderer.proposedSize = ProposedViewSize(wrappedCardSize)
+
+        guard let image = renderer.uiImage,
+              let data = image.jpegData(compressionQuality: 0.9) else {
+            return
+        }
+
+        let filename = "wrapped-\(stats.monthStart.timeIntervalSince1970).jpg"
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent(filename)
+        do {
+            try data.write(to: url, options: .atomic)
+            wrappedShareURL = url
+        } catch {
+            wrappedShareURL = nil
         }
     }
 }

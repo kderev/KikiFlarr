@@ -3,7 +3,11 @@ import Foundation
 actor ResponseCache {
     static let shared = ResponseCache()
     
-    private struct CacheEntry<T> {
+    private protocol CacheEntryProtocol {
+        var isExpired: Bool { get }
+    }
+
+    private struct CacheEntry<T>: CacheEntryProtocol {
         let data: T
         let timestamp: Date
         let ttl: TimeInterval
@@ -13,7 +17,7 @@ actor ResponseCache {
         }
     }
     
-    private var cache: [String: Any] = [:]
+    private var cache: [String: CacheEntryProtocol] = [:]
     
     private init() {
         Task {
@@ -47,7 +51,7 @@ actor ResponseCache {
     
     func removeExpired() {
         for key in cache.keys {
-            if let entry = cache[key] as? CacheEntry<Any>, entry.isExpired {
+            if let entry = cache[key], entry.isExpired {
                 cache.removeValue(forKey: key)
             }
         }

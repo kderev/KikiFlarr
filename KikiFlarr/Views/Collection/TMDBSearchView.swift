@@ -12,7 +12,7 @@ struct TMDBSearchView: View {
     @FocusState private var isSearchFocused: Bool
     
     @State private var searchText = ""
-    @State private var searchType: TMDBSearchType = .movies
+    @State private var searchType: TMDBSearchType
     @State private var isSearching = false
     @State private var errorMessage: String?
     
@@ -29,6 +29,10 @@ struct TMDBSearchView: View {
     // Sheet states - utilisation de item binding pour éviter la page grise
     @State private var selectedMovie: TMDBMovie?
     @State private var selectedSeries: TMDBTVShow?
+
+    init(initialSearchType: TMDBSearchType = .movies) {
+        _searchType = State(initialValue: initialSearchType)
+    }
     
     var body: some View {
         NavigationStack {

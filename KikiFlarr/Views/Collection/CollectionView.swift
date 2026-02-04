@@ -527,9 +527,13 @@ struct WatchedEpisodeRow: View {
                     .lineLimit(2)
 
                 HStack(spacing: 8) {
-                    Label(episode.watchedDate, systemImage: "calendar")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                    HStack(spacing: 4) {
+                        Image(systemName: "calendar")
+                            .font(.caption2)
+                        Text(episode.watchedDate, style: .date)
+                            .font(.caption)
+                    }
+                    .foregroundColor(.secondary)
                     if let runtime = episode.formattedRuntime {
                         Text(runtime)
                             .font(.caption)
@@ -603,9 +607,13 @@ struct WatchedMovieRow: View {
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                 
-                Label(movie.watchedDate, systemImage: "calendar")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                HStack(spacing: 4) {
+                    Image(systemName: "calendar")
+                        .font(.caption2)
+                    Text(movie.watchedDate, style: .date)
+                        .font(.caption)
+                }
+                .foregroundColor(.secondary)
                 
                 if let rating = movie.rating {
                     HStack(spacing: 2) {

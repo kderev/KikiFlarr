@@ -150,8 +150,8 @@ struct WatchedMoviesListView: View {
     }
     
     private var moviesList: some View {
-        List {
-            Section {
+        ScrollView {
+            LazyVStack(spacing: 20) {
                 CollectionHeroCard(
                     title: "Ajout rapide",
                     subtitle: "Comme sur Trakt, marquez vos films et séries vus en quelques secondes."
@@ -179,84 +179,81 @@ struct WatchedMoviesListView: View {
                         )
                     }
                 }
-                .listRowInsets(EdgeInsets())
-                .listRowBackground(Color.clear)
-            }
 
-            // Stats rapides
-            Section {
-                VStack(spacing: 12) {
-                    // Première ligne : Films, Épisodes, Total
-                    HStack(spacing: 12) {
-                        StatBubble(
-                            icon: "film.fill",
-                            value: "\(watchedViewModel.stats.totalMovies)",
-                            label: "Films",
-                            color: .blue
-                        )
-                        
-                        StatBubble(
-                            icon: "tv.fill",
-                            value: "\(watchedViewModel.stats.totalEpisodes)",
-                            label: "Épisodes",
-                            color: .teal
-                        )
-                        
-                        StatBubble(
-                            icon: "play.rectangle.fill",
-                            value: "\(watchedViewModel.stats.totalWatched)",
-                            label: "Total",
-                            color: .indigo
-                        )
-                    }
-                    
-                    // Deuxième ligne : Durée totale et Streak
-                    HStack(spacing: 12) {
-                        StatBubble(
-                            icon: "clock.fill",
-                            value: watchedViewModel.stats.formattedCombinedRuntime,
-                            label: "Durée totale",
-                            color: .purple
-                        )
-                        
-                        StatBubble(
-                            icon: "flame.fill",
-                            value: "\(watchedViewModel.stats.currentStreak)",
-                            label: "Streak",
-                            color: .orange
-                        )
-                    }
-                }
-                .listRowBackground(Color.clear)
-                .listRowInsets(EdgeInsets())
-                .padding(.vertical, 8)
-            }
-            
-            // Liste des films
-            Section("Films récents") {
-                ForEach(filteredMovies) { movie in
-                    WatchedMovieRow(movie: movie)
-                        .swipeActions(edge: .trailing) {
-                            Button(role: .destructive) {
-                                watchedViewModel.removeFromWatched(movie)
-                            } label: {
-                                Label("Supprimer", systemImage: "trash")
-                            }
+                CollectionSectionCard {
+                    VStack(spacing: 12) {
+                        HStack(spacing: 12) {
+                            StatBubble(
+                                icon: "film.fill",
+                                value: "\(watchedViewModel.stats.totalMovies)",
+                                label: "Films",
+                                color: .blue
+                            )
+                            
+                            StatBubble(
+                                icon: "tv.fill",
+                                value: "\(watchedViewModel.stats.totalEpisodes)",
+                                label: "Épisodes",
+                                color: .teal
+                            )
+                            
+                            StatBubble(
+                                icon: "play.rectangle.fill",
+                                value: "\(watchedViewModel.stats.totalWatched)",
+                                label: "Total",
+                                color: .indigo
+                            )
                         }
+                        
+                        HStack(spacing: 12) {
+                            StatBubble(
+                                icon: "clock.fill",
+                                value: watchedViewModel.stats.formattedCombinedRuntime,
+                                label: "Durée totale",
+                                color: .purple
+                            )
+                            
+                            StatBubble(
+                                icon: "flame.fill",
+                                value: "\(watchedViewModel.stats.currentStreak)",
+                                label: "Streak",
+                                color: .orange
+                            )
+                        }
+                    }
+                }
+
+                CollectionSectionHeader(title: "Films récents", systemImage: "sparkles")
+                VStack(spacing: 12) {
+                    ForEach(filteredMovies) { movie in
+                        WatchedMovieRow(movie: movie) {
+                            watchedViewModel.removeFromWatched(movie)
+                        }
+                    }
                 }
             }
+            .padding(.vertical, 16)
         }
-        .listStyle(.insetGrouped)
         .searchable(text: $searchText, prompt: "Rechercher un film")
     }
 }
 
 // MARK: - Liste des épisodes vus
 
+struct NextEpisodeSuggestion: Identifiable {
+    let id = UUID()
+    let series: TMDBTVShow
+    let episode: TMDBEpisode
+}
+
 struct WatchedEpisodesListView: View {
     @EnvironmentObject var watchedViewModel: WatchedViewModel
     @EnvironmentObject var instanceManager: InstanceManager
     @State private var searchText = ""
+    @State private var nextEpisodeSuggestion: NextEpisodeSuggestion?
+    @State private var isLoadingSuggestion = false
+    @State private var selectedEpisode: TMDBEpisode?
+    @State private var selectedSeries: TMDBTVShow?
     let onAddMovie: () -> Void
     let onAddSeries: () -> Void
 
@@ -304,8 +301,8 @@ struct WatchedEpisodesListView: View {
     }
 
     private var episodesList: some View {
-        List {
-            Section {
+        ScrollView {
+            LazyVStack(spacing: 20) {
                 CollectionHeroCard(
                     title: "Ajout rapide",
                     subtitle: "Ajoutez une série vue et sélectionnez les épisodes en un geste."
@@ -333,75 +330,160 @@ struct WatchedEpisodesListView: View {
                         )
                     }
                 }
-                .listRowInsets(EdgeInsets())
-                .listRowBackground(Color.clear)
-            }
 
-            // Stats rapides
-            Section {
-                VStack(spacing: 12) {
-                    // Première ligne : Films, Épisodes, Total
-                    HStack(spacing: 12) {
-                        StatBubble(
-                            icon: "film.fill",
-                            value: "\(watchedViewModel.stats.totalMovies)",
-                            label: "Films",
-                            color: .blue
-                        )
-
-                        StatBubble(
-                            icon: "tv.fill",
-                            value: "\(watchedViewModel.stats.totalEpisodes)",
-                            label: "Épisodes",
-                            color: .teal
-                        )
-
-                        StatBubble(
-                            icon: "play.rectangle.fill",
-                            value: "\(watchedViewModel.stats.totalWatched)",
-                            label: "Total",
-                            color: .indigo
-                        )
+                if let suggestion = nextEpisodeSuggestion {
+                    NextEpisodeSuggestionCard(suggestion: suggestion) {
+                        selectedEpisode = suggestion.episode
+                        selectedSeries = suggestion.series
                     }
-
-                    // Deuxième ligne : Durée totale et Streak
-                    HStack(spacing: 12) {
-                        StatBubble(
-                            icon: "clock.fill",
-                            value: watchedViewModel.stats.formattedCombinedRuntime,
-                            label: "Durée totale",
-                            color: .purple
-                        )
-
-                        StatBubble(
-                            icon: "flame.fill",
-                            value: "\(watchedViewModel.stats.currentStreak)",
-                            label: "Streak",
-                            color: .orange
-                        )
-                    }
-                }
-                .listRowBackground(Color.clear)
-                .listRowInsets(EdgeInsets())
-                .padding(.vertical, 8)
-            }
-
-            // Liste des épisodes
-            Section("Épisodes récents") {
-                ForEach(filteredEpisodes) { episode in
-                    WatchedEpisodeRow(episode: episode)
-                        .swipeActions(edge: .trailing) {
-                            Button(role: .destructive) {
-                                watchedViewModel.removeFromWatched(episode)
-                            } label: {
-                                Label("Supprimer", systemImage: "trash")
-                            }
+                } else if isLoadingSuggestion {
+                    CollectionSectionCard {
+                        HStack(spacing: 12) {
+                            ProgressView()
+                            Text("Préparation de votre prochain épisode...")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
                         }
+                    }
                 }
+
+                CollectionSectionCard {
+                    VStack(spacing: 12) {
+                        HStack(spacing: 12) {
+                            StatBubble(
+                                icon: "film.fill",
+                                value: "\(watchedViewModel.stats.totalMovies)",
+                                label: "Films",
+                                color: .blue
+                            )
+
+                            StatBubble(
+                                icon: "tv.fill",
+                                value: "\(watchedViewModel.stats.totalEpisodes)",
+                                label: "Épisodes",
+                                color: .teal
+                            )
+
+                            StatBubble(
+                                icon: "play.rectangle.fill",
+                                value: "\(watchedViewModel.stats.totalWatched)",
+                                label: "Total",
+                                color: .indigo
+                            )
+                        }
+
+                        HStack(spacing: 12) {
+                            StatBubble(
+                                icon: "clock.fill",
+                                value: watchedViewModel.stats.formattedCombinedRuntime,
+                                label: "Durée totale",
+                                color: .purple
+                            )
+
+                            StatBubble(
+                                icon: "flame.fill",
+                                value: "\(watchedViewModel.stats.currentStreak)",
+                                label: "Streak",
+                                color: .orange
+                            )
+                        }
+                    }
+                }
+
+                CollectionSectionHeader(title: "Épisodes récents", systemImage: "sparkles")
+                VStack(spacing: 12) {
+                    ForEach(filteredEpisodes) { episode in
+                        WatchedEpisodeRow(episode: episode) {
+                            watchedViewModel.removeFromWatched(episode)
+                        }
+                    }
+                }
+            }
+            .padding(.vertical, 16)
+        }
+        .searchable(text: $searchText, prompt: "Rechercher un épisode ou une série")
+        .task(id: watchedViewModel.watchedEpisodes.first?.id) {
+            await loadNextEpisodeSuggestion()
+        }
+        .sheet(item: $selectedEpisode) { episode in
+            if let series = selectedSeries {
+                EpisodeRatingSheet(episode: episode, series: series) { rating, notes, watchedDate in
+                    markEpisodeAsWatched(episode: episode, series: series, rating: rating, notes: notes, watchedDate: watchedDate)
+                }
+            } else {
+                EmptyView()
             }
         }
-        .listStyle(.insetGrouped)
-        .searchable(text: $searchText, prompt: "Rechercher un épisode ou une série")
+    }
+
+    private func loadNextEpisodeSuggestion() async {
+        guard let lastEpisode = watchedViewModel.watchedEpisodes.first,
+              instanceManager.hasTMDBConfigured,
+              let service = instanceManager.tmdbService() else {
+            nextEpisodeSuggestion = nil
+            return
+        }
+
+        isLoadingSuggestion = true
+
+        do {
+            let series = try await service.getTVShowDetails(id: lastEpisode.seriesTmdbId)
+            if let nextEpisode = try await fetchNextEpisode(service: service, lastEpisode: lastEpisode) {
+                nextEpisodeSuggestion = NextEpisodeSuggestion(series: series, episode: nextEpisode)
+            } else {
+                nextEpisodeSuggestion = nil
+            }
+        } catch {
+            nextEpisodeSuggestion = nil
+        }
+
+        isLoadingSuggestion = false
+    }
+
+    private func fetchNextEpisode(service: TMDBService, lastEpisode: WatchedEpisode) async throws -> TMDBEpisode? {
+        let seasonDetails = try await service.getSeasonDetails(
+            tvId: lastEpisode.seriesTmdbId,
+            seasonNumber: lastEpisode.seasonNumber
+        )
+
+        if let next = seasonDetails.episodes?.first(where: { $0.episodeNumber == lastEpisode.episodeNumber + 1 }) {
+            return next
+        }
+
+        let nextSeasonNumber = lastEpisode.seasonNumber + 1
+        let nextSeason = try await service.getSeasonDetails(
+            tvId: lastEpisode.seriesTmdbId,
+            seasonNumber: nextSeasonNumber
+        )
+
+        return nextSeason.episodes?.first(where: { $0.episodeNumber == 1 })
+    }
+
+    private func markEpisodeAsWatched(
+        episode: TMDBEpisode,
+        series: TMDBTVShow,
+        rating: Int?,
+        notes: String?,
+        watchedDate: Date
+    ) {
+        let watchedEpisode = WatchedEpisode(
+            tmdbId: episode.id,
+            seriesTmdbId: series.id,
+            seriesTitle: series.name,
+            seriesPosterURL: series.posterURL?.absoluteString,
+            seriesTotalEpisodes: series.numberOfEpisodes,
+            episodeTitle: episode.name,
+            seasonNumber: episode.seasonNumber,
+            episodeNumber: episode.episodeNumber,
+            runtime: episode.runtime,
+            stillURL: episode.stillURL?.absoluteString,
+            overview: episode.overview,
+            watchedDate: watchedDate,
+            rating: rating,
+            notes: notes
+        )
+
+        watchedViewModel.addToWatched(watchedEpisode)
     }
 }
 
@@ -409,11 +491,11 @@ struct WatchedEpisodesListView: View {
 
 struct WatchedEpisodeRow: View {
     let episode: WatchedEpisode
+    var onDelete: (() -> Void)? = nil
 
     var body: some View {
-        HStack(spacing: 12) {
-            // Poster de la série
-            AsyncImage(url: URL(string: episode.seriesPosterURL ?? "")) { phase in
+        HStack(spacing: 16) {
+            AsyncImage(url: URL(string: episode.stillURL ?? episode.seriesPosterURL ?? "")) { phase in
                 switch phase {
                 case .success(let image):
                     image
@@ -431,49 +513,59 @@ struct WatchedEpisodeRow: View {
                         .fill(Color.gray.opacity(0.3))
                 }
             }
-            .frame(width: 50, height: 75)
-            .clipShape(RoundedRectangle(cornerRadius: 6))
+            .frame(width: 96, height: 64)
+            .clipShape(RoundedRectangle(cornerRadius: 10))
 
-            // Infos
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: 6) {
                 Text(episode.seriesTitle)
+                    .font(.headline)
+                    .lineLimit(1)
+
+                Text("\(episode.episodeCode) • \(episode.episodeTitle)")
                     .font(.subheadline)
-                    .fontWeight(.medium)
-                    .lineLimit(1)
-
-                Text("S\(episode.seasonNumber)E\(episode.episodeNumber) - \(episode.episodeTitle)")
-                    .font(.caption)
                     .foregroundColor(.secondary)
-                    .lineLimit(1)
+                    .lineLimit(2)
 
-                HStack(spacing: 4) {
-                    Image(systemName: "calendar")
-                        .font(.caption2)
-                    Text(episode.watchedDate, style: .date)
-                        .font(.caption)
-                }
-                .foregroundColor(.secondary)
-
-                // Note personnelle
-                if let rating = episode.rating {
-                    HStack(spacing: 2) {
-                        ForEach(1...5, id: \.self) { star in
-                            Image(systemName: star <= rating ? "star.fill" : "star")
-                                .font(.caption2)
-                                .foregroundColor(.yellow)
-                        }
+                HStack(spacing: 8) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "calendar")
+                            .font(.caption2)
+                        Text(episode.watchedDate, style: .date)
+                            .font(.caption)
+                    }
+                    .foregroundColor(.secondary)
+                    if let runtime = episode.formattedRuntime {
+                        Text(runtime)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
                     }
                 }
             }
 
-            Spacer()
+            Spacer(minLength: 0)
 
-            // Badge "Vu"
-            Image(systemName: "checkmark.circle.fill")
-                .font(.title2)
-                .foregroundColor(.green)
+            VStack(spacing: 8) {
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.title2)
+                    .foregroundColor(.green)
+
+                if let onDelete {
+                    Button {
+                        onDelete()
+                    } label: {
+                        Image(systemName: "trash")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
         }
-        .padding(.vertical, 4)
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 18)
+                .fill(Color(.secondarySystemBackground))
+        )
     }
 }
 
@@ -481,10 +573,10 @@ struct WatchedEpisodeRow: View {
 
 struct WatchedMovieRow: View {
     let movie: WatchedMovie
+    var onDelete: (() -> Void)? = nil
     
     var body: some View {
-        HStack(spacing: 12) {
-            // Poster
+        HStack(spacing: 16) {
             AsyncImage(url: URL(string: movie.posterURL ?? "")) { phase in
                 switch phase {
                 case .success(let image):
@@ -503,18 +595,16 @@ struct WatchedMovieRow: View {
                         .fill(Color.gray.opacity(0.3))
                 }
             }
-            .frame(width: 50, height: 75)
-            .clipShape(RoundedRectangle(cornerRadius: 6))
+            .frame(width: 70, height: 100)
+            .clipShape(RoundedRectangle(cornerRadius: 10))
             
-            // Infos
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: 6) {
                 Text(movie.title)
-                    .font(.subheadline)
-                    .fontWeight(.medium)
+                    .font(.headline)
                     .lineLimit(2)
                 
                 Text("\(movie.year)")
-                    .font(.caption)
+                    .font(.subheadline)
                     .foregroundColor(.secondary)
                 
                 HStack(spacing: 4) {
@@ -525,7 +615,6 @@ struct WatchedMovieRow: View {
                 }
                 .foregroundColor(.secondary)
                 
-                // Note personnelle
                 if let rating = movie.rating {
                     HStack(spacing: 2) {
                         ForEach(1...5, id: \.self) { star in
@@ -537,14 +626,30 @@ struct WatchedMovieRow: View {
                 }
             }
             
-            Spacer()
+            Spacer(minLength: 0)
             
-            // Badge "Vu"
-            Image(systemName: "checkmark.circle.fill")
-                .font(.title2)
-                .foregroundColor(.green)
+            VStack(spacing: 8) {
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.title2)
+                    .foregroundColor(.green)
+                
+                if let onDelete {
+                    Button {
+                        onDelete()
+                    } label: {
+                        Image(systemName: "trash")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
         }
-        .padding(.vertical, 4)
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 18)
+                .fill(Color(.secondarySystemBackground))
+        )
     }
 }
 
@@ -844,7 +949,8 @@ struct CollectionHeroCard<Content: View>: View {
         VStack(alignment: .leading, spacing: 16) {
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
-                    .font(.headline)
+                    .font(.title3)
+                    .fontWeight(.semibold)
                 Text(subtitle)
                     .font(.subheadline)
                     .foregroundColor(.secondary)
@@ -858,8 +964,18 @@ struct CollectionHeroCard<Content: View>: View {
             }
         }
         .padding()
-        .background(Color(.secondarySystemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .background(
+            LinearGradient(
+                colors: [Color(.secondarySystemBackground), Color(.tertiarySystemBackground)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 24))
+        .overlay(
+            RoundedRectangle(cornerRadius: 24)
+                .stroke(Color.white.opacity(0.08), lineWidth: 1)
+        )
         .padding(.horizontal)
         .padding(.top, 8)
     }
@@ -878,6 +994,7 @@ struct CollectionActionCard: View {
                 HStack(spacing: 8) {
                     Image(systemName: systemImage)
                         .font(.title3)
+                        .foregroundColor(tint)
                     Text(title)
                         .font(.subheadline)
                         .fontWeight(.semibold)
@@ -890,16 +1007,16 @@ struct CollectionActionCard: View {
             .padding()
             .background(
                 LinearGradient(
-                    colors: [tint.opacity(0.18), tint.opacity(0.05)],
+                    colors: [tint.opacity(0.25), tint.opacity(0.08)],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
             )
-            .clipShape(RoundedRectangle(cornerRadius: 14))
+            .clipShape(RoundedRectangle(cornerRadius: 18))
         }
         .buttonStyle(.plain)
         .overlay(
-            RoundedRectangle(cornerRadius: 14)
+            RoundedRectangle(cornerRadius: 18)
                 .stroke(tint.opacity(0.25), lineWidth: 1)
         )
     }
@@ -927,7 +1044,108 @@ struct CollectionInfoCard: View {
         .frame(width: 240, alignment: .leading)
         .padding()
         .background(Color(.tertiarySystemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 14))
+        .clipShape(RoundedRectangle(cornerRadius: 18))
+    }
+}
+
+struct CollectionSectionCard<Content: View>: View {
+    @ViewBuilder var content: Content
+
+    var body: some View {
+        content
+            .padding()
+            .frame(maxWidth: .infinity)
+            .background(
+                RoundedRectangle(cornerRadius: 24)
+                    .fill(Color(.secondarySystemBackground))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 24)
+                    .stroke(Color.white.opacity(0.06), lineWidth: 1)
+            )
+            .padding(.horizontal)
+    }
+}
+
+struct CollectionSectionHeader: View {
+    let title: String
+    let systemImage: String
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: systemImage)
+                .foregroundColor(.accentColor)
+            Text(title)
+                .font(.headline)
+            Spacer()
+        }
+        .padding(.horizontal)
+    }
+}
+
+struct NextEpisodeSuggestionCard: View {
+    let suggestion: NextEpisodeSuggestion
+    let onAdd: () -> Void
+
+    var body: some View {
+        CollectionSectionCard {
+            VStack(alignment: .leading, spacing: 16) {
+                HStack {
+                    Text("Continuer la série")
+                        .font(.headline)
+                    Spacer()
+                    Text("Prochain épisode")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+
+                HStack(spacing: 16) {
+                    AsyncImage(url: suggestion.episode.stillURL ?? suggestion.series.posterURL) { phase in
+                        switch phase {
+                        case .success(let image):
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                        case .failure(_), .empty:
+                            Rectangle()
+                                .fill(Color.gray.opacity(0.3))
+                                .overlay(
+                                    Image(systemName: "play.rectangle")
+                                        .foregroundColor(.gray)
+                                )
+                        @unknown default:
+                            Rectangle()
+                                .fill(Color.gray.opacity(0.3))
+                        }
+                    }
+                    .frame(width: 130, height: 80)
+                    .clipShape(RoundedRectangle(cornerRadius: 14))
+
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(suggestion.series.name)
+                            .font(.headline)
+                            .lineLimit(1)
+                        Text("\(suggestion.episode.episodeCode) • \(suggestion.episode.name)")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                            .lineLimit(2)
+                        if let runtime = suggestion.episode.formattedRuntime {
+                            Text(runtime)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+
+                    Spacer(minLength: 0)
+                }
+
+                Button(action: onAdd) {
+                    Label("Ajouter cet épisode", systemImage: "plus.circle.fill")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+            }
+        }
     }
 }
 

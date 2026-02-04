@@ -6,6 +6,7 @@ struct CollectionView: View {
     @State private var selectedTab: CollectionTab = .movies
     @State private var showStats = false
     @State private var showTMDBSearch = false
+    @State private var tmdbSearchType: TMDBSearchType = .movies
     
     enum CollectionTab: String, CaseIterable {
         case movies = "Films vus"
@@ -30,9 +31,27 @@ struct CollectionView: View {
                 Group {
                     switch selectedTab {
                     case .movies:
-                        WatchedMoviesListView()
+                        WatchedMoviesListView(
+                            onAddMovie: {
+                                tmdbSearchType = .movies
+                                showTMDBSearch = true
+                            },
+                            onAddSeries: {
+                                tmdbSearchType = .series
+                                showTMDBSearch = true
+                            }
+                        )
                     case .episodes:
-                        WatchedEpisodesListView()
+                        WatchedEpisodesListView(
+                            onAddMovie: {
+                                tmdbSearchType = .movies
+                                showTMDBSearch = true
+                            },
+                            onAddSeries: {
+                                tmdbSearchType = .series
+                                showTMDBSearch = true
+                            }
+                        )
                     case .badges:
                         BadgesGridView()
                     }
@@ -41,8 +60,9 @@ struct CollectionView: View {
             .navigationTitle("Ma Collection")
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    if instanceManager.hasTMDBConfigured && selectedTab == .movies {
+                    if instanceManager.hasTMDBConfigured && selectedTab != .badges {
                         Button {
+                            tmdbSearchType = selectedTab == .episodes ? .series : .movies
                             showTMDBSearch = true
                         } label: {
                             Image(systemName: "plus")
@@ -62,7 +82,7 @@ struct CollectionView: View {
                 StatsView()
             }
             .sheet(isPresented: $showTMDBSearch) {
-                TMDBSearchView()
+                TMDBSearchView(initialSearchType: tmdbSearchType)
             }
         }
         .overlay(alignment: .top) {
@@ -84,6 +104,8 @@ struct WatchedMoviesListView: View {
     @EnvironmentObject var watchedViewModel: WatchedViewModel
     @EnvironmentObject var instanceManager: InstanceManager
     @State private var searchText = ""
+    let onAddMovie: () -> Void
+    let onAddSeries: () -> Void
     
     var filteredMovies: [WatchedMovie] {
         if searchText.isEmpty {
@@ -109,15 +131,58 @@ struct WatchedMoviesListView: View {
             Label("Aucun film vu", systemImage: "film")
         } description: {
             if instanceManager.hasTMDBConfigured {
-                Text("Appuyez sur + pour rechercher et ajouter des films")
+                Text("Ajoutez un film ou une série vue pour démarrer votre collection.")
             } else {
                 Text("Marquez des films comme vus depuis votre bibliothèque ou configurez TMDB dans les paramètres pour rechercher des films")
+            }
+        } actions: {
+            if instanceManager.hasTMDBConfigured {
+                Button("Ajouter un film") {
+                    onAddMovie()
+                }
+                .buttonStyle(.borderedProminent)
+                Button("Ajouter une série") {
+                    onAddSeries()
+                }
+                .buttonStyle(.bordered)
             }
         }
     }
     
     private var moviesList: some View {
         List {
+            Section {
+                CollectionHeroCard(
+                    title: "Ajout rapide",
+                    subtitle: "Comme sur Trakt, marquez vos films et séries vus en quelques secondes."
+                ) {
+                    if instanceManager.hasTMDBConfigured {
+                        CollectionActionCard(
+                            title: "Ajouter un film",
+                            subtitle: "Recherche TMDB",
+                            systemImage: "film.fill",
+                            tint: .blue,
+                            action: onAddMovie
+                        )
+                        CollectionActionCard(
+                            title: "Ajouter une série",
+                            subtitle: "Choisir des épisodes",
+                            systemImage: "tv.fill",
+                            tint: .teal,
+                            action: onAddSeries
+                        )
+                    } else {
+                        CollectionInfoCard(
+                            title: "TMDB non configuré",
+                            message: "Activez TMDB dans les réglages pour rechercher et ajouter rapidement.",
+                            systemImage: "gearshape.fill"
+                        )
+                    }
+                }
+                .listRowInsets(EdgeInsets())
+                .listRowBackground(Color.clear)
+            }
+
             // Stats rapides
             Section {
                 VStack(spacing: 12) {
@@ -190,7 +255,10 @@ struct WatchedMoviesListView: View {
 
 struct WatchedEpisodesListView: View {
     @EnvironmentObject var watchedViewModel: WatchedViewModel
+    @EnvironmentObject var instanceManager: InstanceManager
     @State private var searchText = ""
+    let onAddMovie: () -> Void
+    let onAddSeries: () -> Void
 
     var filteredEpisodes: [WatchedEpisode] {
         if searchText.isEmpty {
@@ -216,12 +284,59 @@ struct WatchedEpisodesListView: View {
         ContentUnavailableView {
             Label("Aucun épisode vu", systemImage: "tv")
         } description: {
-            Text("Marquez des épisodes comme vus depuis votre bibliothèque de séries")
+            if instanceManager.hasTMDBConfigured {
+                Text("Ajoutez une série pour sélectionner les épisodes vus.")
+            } else {
+                Text("Marquez des épisodes comme vus depuis votre bibliothèque de séries")
+            }
+        } actions: {
+            if instanceManager.hasTMDBConfigured {
+                Button("Ajouter une série") {
+                    onAddSeries()
+                }
+                .buttonStyle(.borderedProminent)
+                Button("Ajouter un film") {
+                    onAddMovie()
+                }
+                .buttonStyle(.bordered)
+            }
         }
     }
 
     private var episodesList: some View {
         List {
+            Section {
+                CollectionHeroCard(
+                    title: "Ajout rapide",
+                    subtitle: "Ajoutez une série vue et sélectionnez les épisodes en un geste."
+                ) {
+                    if instanceManager.hasTMDBConfigured {
+                        CollectionActionCard(
+                            title: "Ajouter une série",
+                            subtitle: "Choisir des épisodes",
+                            systemImage: "tv.fill",
+                            tint: .teal,
+                            action: onAddSeries
+                        )
+                        CollectionActionCard(
+                            title: "Ajouter un film",
+                            subtitle: "Recherche TMDB",
+                            systemImage: "film.fill",
+                            tint: .blue,
+                            action: onAddMovie
+                        )
+                    } else {
+                        CollectionInfoCard(
+                            title: "TMDB non configuré",
+                            message: "Activez TMDB pour rechercher vos séries et films.",
+                            systemImage: "gearshape.fill"
+                        )
+                    }
+                }
+                .listRowInsets(EdgeInsets())
+                .listRowBackground(Color.clear)
+            }
+
             // Stats rapides
             Section {
                 VStack(spacing: 12) {
@@ -715,6 +830,104 @@ struct BadgeDetailSheet: View {
             startPoint: .topLeading,
             endPoint: .bottomTrailing
         )
+    }
+}
+
+// MARK: - Cartes d'ajout rapide
+
+struct CollectionHeroCard<Content: View>: View {
+    let title: String
+    let subtitle: String
+    @ViewBuilder var content: Content
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.headline)
+                Text(subtitle)
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+            }
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 12) {
+                    content
+                }
+                .padding(.vertical, 4)
+            }
+        }
+        .padding()
+        .background(Color(.secondarySystemBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .padding(.horizontal)
+        .padding(.top, 8)
+    }
+}
+
+struct CollectionActionCard: View {
+    let title: String
+    let subtitle: String
+    let systemImage: String
+    let tint: Color
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(spacing: 8) {
+                    Image(systemName: systemImage)
+                        .font(.title3)
+                    Text(title)
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                }
+                Text(subtitle)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            .frame(width: 190, alignment: .leading)
+            .padding()
+            .background(
+                LinearGradient(
+                    colors: [tint.opacity(0.18), tint.opacity(0.05)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 14))
+        }
+        .buttonStyle(.plain)
+        .overlay(
+            RoundedRectangle(cornerRadius: 14)
+                .stroke(tint.opacity(0.25), lineWidth: 1)
+        )
+    }
+}
+
+struct CollectionInfoCard: View {
+    let title: String
+    let message: String
+    let systemImage: String
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: systemImage)
+                .font(.title2)
+                .foregroundColor(.accentColor)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                Text(message)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .frame(width: 240, alignment: .leading)
+        .padding()
+        .background(Color(.tertiarySystemBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 14))
     }
 }
 

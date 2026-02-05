@@ -19,6 +19,7 @@ class LibraryViewModel: ObservableObject {
     enum LibraryTab {
         case movies
         case series
+        case calendar
     }
     
     struct MovieWithInstance: Identifiable, Equatable {

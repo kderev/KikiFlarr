@@ -65,10 +65,22 @@ struct DiscoverView: View {
     
     private var requestsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Demandes récentes")
-                .font(.headline)
-                .padding(.horizontal)
-            
+            HStack {
+                Text("Demandes récentes")
+                    .font(.headline)
+
+                Spacer()
+
+                NavigationLink {
+                    RequestsView()
+                } label: {
+                    Text("Gérer")
+                        .font(.subheadline)
+                        .foregroundColor(.blue)
+                }
+            }
+            .padding(.horizontal)
+
             ScrollView(.horizontal, showsIndicators: false) {
                 LazyHStack(spacing: 12) {
                     ForEach(viewModel.recentRequests) { requestWithMedia in
